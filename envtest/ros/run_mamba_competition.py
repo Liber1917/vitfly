@@ -28,6 +28,7 @@ import numpy as np
 import pandas as pd
 import torch
 import json
+import cv2  # Fix: was missing, required by preprocess_input()
 from datetime import datetime
 
 # 添加模型路径
@@ -112,7 +113,8 @@ class DroneMambaEvaluator:
         )
         
         self.state_sub = rospy.Subscriber(
-            "/kingfisher/dodgeros_pilot/groundtruth/state",
+            # Fix: use the same topic as run_competition.py; groundtruth/state may not be published
+            "/kingfisher/dodgeros_pilot/state",
             QuadState,
             self.callback_state,
             queue_size=1,
@@ -163,8 +165,21 @@ class DroneMambaEvaluator:
                 rospy.loginfo("⚠️ 检测到碰撞（高度过低）！")
     
     def callback_obstacles(self, msg):
-        """障碍物回调"""
+        """障碍物回调 — Fix: check all obstacles against quad position"""
         self.obstacles = msg
+        if self.current_state is None:
+            return
+        for obs in msg.obstacles:
+            dist = np.linalg.norm([
+                obs.position.x - self.current_state.pose.position.x,
+                obs.position.y - self.current_state.pose.position.y,
+                obs.position.z - self.current_state.pose.position.z
+            ])
+            if dist < obs.scale:
+                if not self.is_collided:
+                    rospy.logwarn("Collision detected with obstacle!")
+                self.is_collided = True
+                return
     
     def preprocess_input(self):
         """预处理输入"""
@@ -179,12 +194,12 @@ class DroneMambaEvaluator:
         # 期望速度（从状态或固定值）
         desired_vel = torch.tensor([5.0]).view(1, 1)  # 默认 5.0 m/s（高速）
         
-        # 四元数 - QuadState 的 pose 是 PoseStamped
+        # Fix: QuadState has a single .pose field (geometry_msgs/Pose), not .pose.pose
         quat = [
-            self.current_state.pose.pose.orientation.w,
-            self.current_state.pose.pose.orientation.x,
-            self.current_state.pose.pose.orientation.y,
-            self.current_state.pose.pose.orientation.z
+            self.current_state.pose.orientation.w,
+            self.current_state.pose.orientation.x,
+            self.current_state.pose.orientation.y,
+            self.current_state.pose.orientation.z
         ]
         quat_tensor = torch.tensor(quat).unsqueeze(0)  # (1, 4)
         

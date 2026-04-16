@@ -90,9 +90,10 @@ def compute_command_vision_based(state, orig_img, prev_img, desiredVel, trained_
             trained_model.lstm.hidden_size = 200
         
         # LSTM 系列模型需要隐藏状态
+        # Fix: LSTM hidden state requires (num_layers, batch_size, hidden_size) — batch_size=1 was missing
         if state.pos[0] < 0.5 or hidden_state is None:
-            hidden_state = (torch.zeros(trained_model.lstm.num_layers, trained_model.lstm.hidden_size).float().to(device),
-                           torch.zeros(trained_model.lstm.num_layers, trained_model.lstm.hidden_size).float().to(device))
+            hidden_state = (torch.zeros(trained_model.lstm.num_layers, 1, trained_model.lstm.hidden_size).float().to(device),
+                           torch.zeros(trained_model.lstm.num_layers, 1, trained_model.lstm.hidden_size).float().to(device))
         
         with torch.no_grad():
             output = trained_model([img.view(1, 1, h, w).to(device), 
@@ -128,45 +129,22 @@ def compute_command_vision_based(state, orig_img, prev_img, desiredVel, trained_
 
 
     x = x.squeeze().cpu().detach().numpy()
-    
-    # 调试输出
-    if rospy.get_time() - int(rospy.get_time()) < 0.1:
-        print(f'[USER_CODE] 模型原始输出 x = {x}, desiredVel = {desiredVel}')
-    
-    x[0] = np.clip(x[0], -1, 1)
-    
-    # 确保有足够的前向速度
-    # 模型应该输出 [前向，侧向，垂直] 方向的速度分量
-    # 归一化后乘以期望速度
+
+    # Normalize model output to unit vector, then scale by desiredVel.
+    # Fix: removed redundant second normalization (norm≈1 after first pass)
+    # and removed x[0] clip-before-normalize which distorted direction.
     norm_x = np.linalg.norm(x)
-    if norm_x > 0.01:
-        x = x / norm_x * desiredVel
+    if norm_x > 1e-6:
+        x = x / norm_x
     else:
-        # 如果模型输出接近零，默认给一个小的前向速度
-        x = np.array([desiredVel, 0.0, 0.0])
-    
-    # 确保最小前向速度 - 这是关键修复
-    # 即使模型预测的前向速度很小，也要保证至少 2m/s 的前向速度
-    min_forward_vel = 2.0
-    if x[0] < min_forward_vel:
-        # 重新归一化，保持方向但增加前向分量
-        forward_ratio = x[0] / (np.linalg.norm(x[1:]) + 1e-6) if np.linalg.norm(x[1:]) > 0 else 1.0
-        x[0] = min_forward_vel
-        # 保持侧向和垂直方向的相对比例
-        if forward_ratio > 1e-6:
-            x[1:] = x[1:] * (min_forward_vel / (x[0] + 1e-6))
-    
-    command.velocity = x
+        x = np.array([1.0, 0.0, 0.0])
+    command.velocity = x * desiredVel
 
     # manual speedup - 在起始位置增加前向速度
     min_xvel_cmd = 1.0
     hardcoded_ctl_threshold = 2.0
     if state.pos[0] < hardcoded_ctl_threshold:
         command.velocity[0] = max(min_xvel_cmd, (state.pos[0]/hardcoded_ctl_threshold)*desiredVel)
-    
-    # 调试输出
-    if rospy.get_time() - int(rospy.get_time()) < 0.1:
-        print(f'[USER_CODE] 最终速度命令 velocity = {command.velocity}, pos[0] = {state.pos[0]:.2f}')
     
 
     # creating debug images,

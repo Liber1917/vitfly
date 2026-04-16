@@ -226,7 +226,8 @@ class AgilePilotNode:
         self.ctr += 1
         self.prevImg = deepcopy(self.last_valid_img)
         img = self.cv_bridge.imgmsg_to_cv2(img_data, desired_encoding="passthrough")
-        img = np.clip(img/self.depth_im_threshold, 0, 1)
+        # Fix: normalize to [0,1] by dividing by 255 to match training dataloading (PNG / 255.0)
+        img = np.clip(img / 255.0, 0, 1)
                 
         if self.prevImg is None:
             self.prevImg = img
@@ -259,7 +260,8 @@ class AgilePilotNode:
         self.publish_command(command)
         # print(f'[RUN_COMPETITION] output: {command.velocity}')
 
-        if self.state.pos[0] < 0.1:
+        # Fix: only record start_time once; repeated resets corrupt elapsed-time logging
+        if self.state.pos[0] < 0.1 and self.start_time == 0:
             self.start_time = command.t
 
         if self.state.pos[0] >= 60 and self.logged_time_flag == 0:
@@ -267,7 +269,7 @@ class AgilePilotNode:
             with open(file, "a") as file:
                 file.write(str(float(command.t - self.start_time))+"\n")
             self.logged_time_flag = 1
-        
+
         #if we exceed the time interval then save the data
         if (self.state.t - self.t1 > self.time_interval or self.t1==0) and self.state.pos[0] < 63:
             #reset the time flag
@@ -284,6 +286,11 @@ class AgilePilotNode:
             # Get the collision flag
             if self.col is None:
                 self.col = 0
+
+            # Fix: guard against curr_cmd being None before first command arrives
+            if self.curr_cmd is None:
+                return
+
             # Append the data frame
             # @TODO: This needs to be managed better if the number of datapoints exceeds 10,000
             self.data_log.loc[len(self.data_log)] = [
@@ -322,7 +329,8 @@ class AgilePilotNode:
     def obstacle_callback(self, obs_data):
         if self.state is None:
             return
-        self.col = self.if_collide(obs_data.obstacles[0])
+        # Fix: check all obstacles, not just the first one
+        self.col = any(self.if_collide(obs) for obs in obs_data.obstacles)
         if self.vision_based:
             return
         if self.rgb_img is None:
@@ -347,7 +355,8 @@ class AgilePilotNode:
         )
         self.publish_command(command)
 
-        if self.state.pos[0] < 0.1:
+        # Fix: only record start_time once; repeated resets corrupt elapsed-time logging
+        if self.state.pos[0] < 0.1 and self.start_time == 0:
             self.start_time = command.t
         if self.state.pos[0] >= 60 and self.logged_time_flag == 0:
             file = "timeTaken.dat"
@@ -409,11 +418,14 @@ class AgilePilotNode:
 
     def if_collide(self, obs):
         """
-        Borrowed and modified from evaluation_node
+        Borrowed and modified from evaluation_node.
+        Fix: compute distance from quad to obstacle (world coords), not from origin.
         """
-
+        quad_pos = self.state.pos  # [x, y, z] in world frame
         dist = np.linalg.norm(
-            np.array([obs.position.x, obs.position.y, obs.position.z])
+            np.array([obs.position.x - quad_pos[0],
+                      obs.position.y - quad_pos[1],
+                      obs.position.z - quad_pos[2]])
         )
         margin = dist - obs.scale
         # Ground hit condition

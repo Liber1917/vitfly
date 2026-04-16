@@ -131,19 +131,19 @@ class Evaluator:
         if not self.is_active:
             return
 
-        obs = msg.obstacles[0]
-        dist = np.linalg.norm(
-            np.array([obs.position.x, obs.position.y, obs.position.z])
-        )
-        margin = dist - obs.scale
-        self.dist.append([msg.header.stamp.to_sec(), margin])
-        if margin < 0:
-            if not self.hit_obstacle:
-                self.crash += 1
-                print("Crashed")
-            self.hit_obstacle = True
-        else:
-            self.hit_obstacle = False
+        # Fix: check all obstacles, not just the first one
+        self.hit_obstacle = False
+        for obs in msg.obstacles:
+            dist = np.linalg.norm(
+                np.array([obs.position.x, obs.position.y, obs.position.z])
+            )
+            margin = dist - obs.scale
+            self.dist.append([msg.header.stamp.to_sec(), margin])
+            if margin < 0:
+                if not self.hit_obstacle:
+                    self.crash += 1
+                    print("Crashed")
+                self.hit_obstacle = True
 
     def abortRun(self):
         print("You did not reach the goal!")

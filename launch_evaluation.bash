@@ -89,7 +89,8 @@ do
 
     # reset flag and kill everything to restart
     relaunch_sim=0
-    killall -9 roscore rosmaster rosout gzserver gzclient RPG_Flightmare.
+    # Fix: removed trailing period from process name so killall matches correctly
+    killall -9 roscore rosmaster rosout gzserver gzclient RPG_Flightmare.x86_64
     sleep 10
 
     # Launch the simulator, unless it is already running
@@ -100,7 +101,8 @@ do
       echo $ROS_PID
       sleep 10
     else
-      killall -9 roscore rosmaster rosout gzserver gzclient RPG_Flightmare.
+      # Fix: removed trailing period from process name
+      killall -9 roscore rosmaster rosout gzserver gzclient RPG_Flightmare.x86_64
       sleep 10
     fi
 
@@ -124,8 +126,13 @@ do
   # Default to ViTLSTM, allow override via MODEL_TYPE environment variable
   MODEL_TYPE=${MODEL_TYPE:-"ViTLSTM"}
   MODEL_PATH=${MODEL_PATH:-"../../models/ViTLSTM_model.pth"}
-  
-  python3 run_competition.py $run_competition_args --des_vel 7.0 --model_type "$MODEL_TYPE" --model_path "$MODEL_PATH" &
+
+  # Fix: route Mamba models to the dedicated evaluation script
+  if [[ "$MODEL_TYPE" == "DroneMamba" || "$MODEL_TYPE" == "Mamba" ]]; then
+    python3 run_mamba_competition.py $run_competition_args --des_vel 7.0 --model_type "$MODEL_TYPE" --model_path "$MODEL_PATH" &
+  else
+    python3 run_competition.py $run_competition_args --des_vel 7.0 --model_type "$MODEL_TYPE" --model_path "$MODEL_PATH" &
+  fi
   COMP_PID="$!"
 
   cd -

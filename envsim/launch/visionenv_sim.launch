@@ -36,7 +36,8 @@
           if="$(arg gui)"/>
     
     <!-- flightmare standalone -->
-    <node name="flight_render" pkg="flightrender" type="vitfly-unity.x86_64" if="$(arg render)"/>
-    <!-- args="-batchmode"/> -->
+    <!-- Fix: pass -batchmode so Unity renderer works in headless (no display) environments -->
+    <node name="flight_render" pkg="flightrender" type="vitfly-unity.x86_64"
+          args="-batchmode" if="$(arg render)"/>
 
 </launch>
