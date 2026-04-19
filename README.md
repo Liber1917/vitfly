@@ -7,6 +7,187 @@ This is the official repository for the paper "Vision Transformers for End-to-En
 
 We demonstrate that vision transformers (ViTs) can be used for end-to-end perception-based obstacle avoidance for quadrotors equipped with a depth camera. We train policies that predict linear velocity commands from depth images to avoid obstacles via behavior cloning from a privileged expert in a simple simulation environment, and show that ViT models combined with recurrence layers (LSTMs) outperform baseline methods based on other popular learning architectures. Deployed on a real quadrotor, our method achieves zero-shot dodging behavior at speeds reaching 7m/s and on multi-obstacle environments.
 
+## WSL2 Environment Setup Guide
+
+This fork adds full **WSL2 (Windows Subsystem for Linux 2)** support for running the Flightmare simulation. The original codebase targets native Ubuntu 20.04; running it under WSL2 requires several workarounds documented below. Follow these steps in order.
+
+### Prerequisites
+
+- Windows 10/11 with WSL2 enabled
+- Ubuntu 20.04 installed in WSL2
+- NVIDIA GPU with latest Windows drivers (the driver is shared between Windows and WSL2)
+- WSLg enabled (comes with modern WSL2, provides display via XWayland)
+
+### Step 1: Enable WSL2 Mirrored Networking
+
+Create or edit `%USERPROFILE%\.wslconfig` on the Windows side (e.g. `C:\Users\YourName\.wslconfig`):
+
+```ini
+[wsl2]
+networkingMode=mirrored
+dnsTunneling=true
+firewall=true
+autoProxy=true
+```
+
+Then restart WSL from PowerShell: `wsl --shutdown`, and reopen your WSL terminal.
+
+Mirrored mode gives WSL the same IP address as Windows, which simplifies ROS networking and is required for the display stack.
+
+### Step 2: Fix Loopback Routing (Critical)
+
+WSL2 mirrored mode routes `127.0.0.1` traffic through a virtual `loopback0` interface instead of the standard `lo` interface. This breaks NetMQ's internal Signaler (TCP loopback pipe), which entirely prevents Unity from connecting via ZMQ. **The simulation will not work without this fix.**
+
+The `launch_evaluation.bash` script in this fork automatically applies the fix on every run. To apply it manually:
+
+```bash
+# Check if the problem exists:
+ip route get 127.0.0.1
+# If output shows "dev loopback0", apply the fix:
+ip route del 127.0.0.1 via 169.254.73.152 dev loopback0 proto kernel src 127.0.0.1 onlink table 127
+ip route flush cache
+# Verify (should show "dev lo"):
+ip route get 127.0.0.1
+```
+
+### Step 3: Install ROS Noetic
+
+```bash
+# Follow the official ROS Noetic installation for Ubuntu 20.04
+sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+sudo apt update
+sudo apt install -y ros-noetic-desktop-full
+echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
+```
+
+### Step 4: Install Python Dependencies (Miniconda)
+
+The system Python conflicts with ROS's `cv_bridge`, so we use a Miniconda environment:
+
+```bash
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+bash Miniconda3-latest-Linux-x86_64.sh -b -p ~/miniconda3
+~/miniconda3/bin/conda init bash
+source ~/.bashrc
+
+# Create Python 3.8 environment (matches ROS Noetic)
+conda create -n ros_py38 python=3.8 -y
+conda activate ros_py38
+
+# Install required packages
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
+pip install numpy pandas pyyaml opencv-python scipy
+```
+
+### Step 5: Fix cv_bridge Library Conflict
+
+ROS's `cv_bridge` and conda's OpenCV load different versions of `libffi`, causing a crash. The fix is to preload the system library:
+
+```bash
+export LD_PRELOAD=/lib/x86_64-linux-gnu/libffi.so.7
+```
+
+This is already included in the modified `launch_evaluation.bash`.
+
+### Step 6: OpenGL Configuration
+
+Unity requires OpenGL 4.5+, but WSL2's Mesa driver defaults to 3.1. We override it with environment variables:
+
+```bash
+export MESA_GL_VERSION_OVERRIDE=4.5
+export MESA_GLSL_VERSION_OVERRIDE=450
+```
+
+Do **NOT** install `libnvidia-gl-*` packages in WSL2 — they conflict with XWayland and cause Unity to crash with `glXGetVisualFromFBConfig` errors. The Mesa d3d12 driver (which comes with WSL2) handles GPU rendering correctly.
+
+This is already included in the modified `launch_evaluation.bash`.
+
+### Step 7: Clone, Build, and Download Assets
+
+```bash
+cd ~
+mkdir -p catkin_ws/src && cd catkin_ws
+catkin init
+catkin config --extend /opt/ros/$ROS_DISTRO
+catkin config --merge-devel
+catkin config --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS=-fdiagnostics-color
+
+cd src
+git clone https://github.com/Liber1917/vitfly.git
+cd vitfly
+
+# Download and extract environments (1GB)
+# From https://upenn.app.box.com/v/ViT-quad-datashare (pw: vitfly2025)
+tar -xvf <path/to/environments.tar> -C flightmare/flightpy/configs/vision
+
+# Download and extract Unity binaries (450MB)
+tar -xvf <path/to/flightrender.tar> -C flightmare/flightrender
+
+# Download and extract pretrained models (50MB)
+tar -xvf <path/to/pretrained_models.tar> -C models
+
+# Install ROS dependencies and build
+bash setup_ros.bash
+cd ../..
+catkin build
+source devel/setup.bash
+cd src/vitfly
+```
+
+### Step 8: Run the Simulation
+
+```bash
+bash launch_evaluation.bash 1 vision
+```
+
+If everything is configured correctly, you should see:
+1. Unity window appears (via WSLg)
+2. `[UnityBridge] Flightmare Unity is connected.`
+3. `[Pilot] Z-position smaller than takeoff height, taking off!`
+4. `[RUN_COMPETITION] Model loaded`
+5. `[RUN_COMPETITION] compute_command_vision_based took ~0.008 seconds`
+
+Run multiple trials to get statistics:
+```bash
+bash launch_evaluation.bash 10 vision
+```
+
+### What Was Changed (Summary)
+
+| File | Change | Reason |
+|------|--------|--------|
+| `launch_evaluation.bash` | Added `ROS_MASTER_URI`, `ROS_IP` env vars | WSL2 mirrored mode uses shared Windows IP |
+| `launch_evaluation.bash` | Added loopback route fix (auto-detect & fix `loopback0` issue) | NetMQ Signaler fails when 127.0.0.1 routes through `loopback0` |
+| `launch_evaluation.bash` | Added `MESA_GL_VERSION_OVERRIDE=4.5` | Unity requires OpenGL 4.5+, Mesa defaults to 3.1 |
+| `launch_evaluation.bash` | Added `LD_PRELOAD=/lib/x86_64-linux-gnu/libffi.so.7` | Fixes `cv_bridge` / libffi conflict with conda |
+| `launch_evaluation.bash` | Added conda activation and `PYTHONPATH` setup | Conda environment needed for Python dependencies |
+| `launch_evaluation.bash` | Changed `rviz:=False` to `rviz:=True` | Enable rviz visualization |
+| `launch_evaluation.bash` | Increased initial sleep from 10s to 15s | Unity needs more startup time under WSL2 |
+| `flightmare/flightpy/configs/vision/config.yaml` | Changed `env_folder: custom_0` → `environment_0`, `render: no` → `yes` | Fix config for evaluation mode |
+| `envtest/ros/run_competition.py` | Added null-check for `last_valid_img` in `img_callback` | Prevents `TypeError: NoneType * int` when no image received yet |
+| `envtest/ros/user_code.py` | Added `.to(device)` for model inputs, `.cpu()` before `.numpy()` | Fixes GPU/CPU tensor mismatch when model runs on CUDA |
+| `envtest/ros/evaluation_node.py` | Added NaN check for `pos_x` | Prevents crash when position data is unavailable |
+| `envtest/ros/user_code.py` | Added null-check for obstacles in `compute_command_state_based` | Graceful handling when no obstacle data available |
+
+### Troubleshooting
+
+**Unity window doesn't appear**: Verify `echo $DISPLAY` returns `:0` (WSLg default). If not, run `export DISPLAY=:0`.
+
+**`[UnityBridge] Unity Connection time out!`**: The loopback route fix is not applied. Run:
+```bash
+ip route get 127.0.0.1
+# Must show "dev lo", NOT "dev loopback0"
+```
+
+**`Segmentation fault (core dumped)` from visionsim_node**: This happens when Unity ZMQ connection fails. Fix the loopback route issue first.
+
+**`[Pilot] Not in hover, won't switch to velocity reference!`**: This is a harmless warning. As long as you also see `compute_command_vision_based` messages, the simulation is running correctly.
+
+**`TypeError: unsupported operand type(s) for *: 'NoneType' and 'int'`**: This was fixed in `run_competition.py`. Make sure you're using the version from this fork.
+
+**rviz shows blank/glitchy display**: Mesa's d3d12 driver may have rendering artifacts. This is cosmetic and doesn't affect simulation correctness.
+
 <!-- GIFs -->
 
 #### Generalization to simulation environments 
