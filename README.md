@@ -188,6 +188,28 @@ ip route get 127.0.0.1
 
 **rviz shows blank/glitchy display**: Mesa's d3d12 driver may have rendering artifacts. This is cosmetic and doesn't affect simulation correctness.
 
+**Simulation and rviz both fail silently / ROS cannot bind**: `launch_evaluation.bash` hardcodes `ROS_MASTER_URI=http://192.168.233.250:11311` and `ROS_IP=192.168.233.250`. If WSL2 no longer has that IP on any interface (e.g. after `wsl --shutdown` or a host network change), all ROS nodes fail to start. Fix by adding a loopback alias **once per WSL2 session**, before running the simulation:
+
+```bash
+ip addr add 192.168.233.250/32 dev lo
+```
+
+Verify it is present:
+```bash
+ip addr show lo | grep 192.168.233.250
+```
+
+This alias is lost on `wsl --shutdown` and must be re-applied each time WSL2 restarts. This is a network configuration step — no source code changes are needed.
+
+**ZMQ ports 10253/10254 occupied after a crash**: When `visionsim_node` crashes, WSL2's kernel keeps the ZMQ sockets alive even after all processes die. No Linux tool (`fuser`, `ss --kill`, `kill -9`) can clear them. The only fix is to run `wsl --shutdown` from **Windows PowerShell**, then reopen WSL2:
+
+```powershell
+# Run in Windows PowerShell (not WSL terminal):
+wsl --shutdown
+```
+
+After WSL2 restarts, re-apply the loopback alias above before launching.
+
 <!-- GIFs -->
 
 #### Generalization to simulation environments 
