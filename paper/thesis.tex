@@ -633,6 +633,13 @@ G\_lstm (CNN+LSTM) & 7m/s & 4 & 1.773 & 0.375 & 2.833 \\
 
 控制质量分析表明，E蒸馏在碰撞次数最低的同时也具有最优的追踪精度（MAE=0.220）和控制平滑度（jerk=0.023），两项指标均优于教师模型（0.346，0.040）。G系列的追踪误差（MAE>1.2）是Mamba变体的3.8--5.8倍，横向偏差MAE\_y（>1.98）更是E蒸馏（0.06）的33倍——这量化了BC训练的纯CNN/LSTM架构存在的控制信号校准问题：模型输出的速度指令与无人机实际响应之间存在显著偏差。
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.72\textwidth]{figures/fig_radar.pdf}
+\caption{多维度模型性能雷达图。所有指标均归一化至[0,1]区间（外圈=最优），涵盖碰撞次数、速度追踪误差（MAE）、控制平滑度（jerk）、推理延迟和横向偏差五个维度。E.dist在除推理延迟外的所有维度上均处于外圈区域。}
+\label{fig:radar}
+\end{figure}
+
 \textbf{蒸馏显著超越教师.} B+ 蒸馏（MambaVision + Mamba-3，2.55M）和 E 蒸馏（DecisionMamba，2.19M）经蒸馏后碰撞次数从 3 次降至 1 次，超越了教师模型的 2 次碰撞。这一结果令人振奋：跨架构知识蒸馏不仅弥补了轻量学生与教师之间的容量差距，还使学生模型利用 Mamba 的线性复杂度优势实现了更好的避障决策。蒸馏将模型从不稳定的 BC 基线性能提升至一个统一的优越水平——所有蒸馏模型的碰撞次数均不超过 2 次。
 
 \textbf{B BC 完全发散与蒸馏修复.} 架构 B（MambaVision + SSM）在 BC 训练中完全无法完成赛道（DNF），其失败归因于 MambaVision 编码器中的伪 SSM 路径（实际为 Linear-GELU-Linear MLP）与后续真实 SSM 时序头之间的语义不匹配，导致训练过程中梯度振荡发散。蒸馏通过引入 ViT 教师的稳定特征对齐信号，成功将 B 从 DNF 状态"救活"至 2 次碰撞，充分体现了蒸馏对不稳定架构的修复能力。
@@ -646,7 +653,16 @@ G\_lstm (CNN+LSTM) & 7m/s & 4 & 1.773 & 0.375 & 2.833 \\
 \includegraphics[width=\textwidth]{figures/figure3.pdf}
 \caption{推理延迟对比。（左）各模型单帧推理时间柱状图，DecisionMamba（E）以7.1ms最快；（右）参数量-推理时间散点图，E位于帕累托前沿。}
 \label{fig:latency}
-\end{figure}C 以 8.5~ms 位列第二。B+ 为 9.8~ms，与教师相当。值得关注的反常现象是：参数量最小的架构 A（0.97M）反而具有最长的推理延迟（24.3~ms）。需要澄清的是，该延迟的主要来源并非 LSTM 时序头——在单步预测 $T=1$ 下，PyTorch 的 LSTM 实现是完全向量化的（等价于一次矩阵乘加运算），不存在串行展开。实际瓶颈在于 SS2D 编码器的四方向选择性扫描：每个方向需独立执行一维并行扫描，四次扫描的计算和访存开销随序列长度线性累积。为验证这一分析，本文在相同 CNN 编码器下对比了不同时序头的推理延迟：LSTM 头 1.00ms、MLP 头 0.74ms、SSM 头 1.90ms（均为同一编码器），三者的差异远小于 SS2D 编码器与 CNN 编码器之间的延迟差距。这一发现表明，参数量不能直接等价于计算效率——编码器的架构设计对推理延迟具有比时序头更大的影响。
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/fig_pareto.pdf}
+\caption{性能帕累托前沿：推理延迟与碰撞次数。标记面积为参数量比例。E.dist和B+.dist以1次碰撞位于帕累托前沿，G\_basic以极低延迟（0.74ms）但4次碰撞位于前沿的另一端。实心标记=蒸馏模型。}
+\label{fig:pareto}
+\end{figure}
+
+C 以 8.5~ms 位列第二。B+ 为 9.8~ms，与教师相当。值得关注的反常现象是：参数量最小的架构 A（0.97M）反而具有最长的推理延迟（24.3~ms）。需要澄清的是，该延迟的主要来源并非 LSTM 时序头——在单步预测 $T=1$ 下，PyTorch 的 LSTM 实现是完全向量化的（等价于一次矩阵乘加运算），不存在串行展开。实际瓶颈在于 SS2D 编码器的四方向选择性扫描：每个方向需独立执行一维并行扫描，四次扫描的计算和访存开销随序列长度线性累积。为验证这一分析，本文在相同 CNN 编码器下对比了不同时序头的推理延迟：LSTM 头 1.00ms、MLP 头 0.74ms、SSM 头 1.90ms（均为同一编码器），三者的差异远小于 SS2D 编码器与 CNN 编码器之间的延迟差距。这一发现表明，参数量不能直接等价于计算效率——编码器的架构设计对推理延迟具有比时序头更大的影响。
 
 \subsubsection{各分支详细性能分析}
 \label{sec:branch-analysis}
@@ -774,6 +790,13 @@ E 蒸馏 & 3 & 4 \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{figures/fig_ablation_heatmap.pdf}
+\caption{数据增强消融：碰撞次数与增强效果分解。（左）各模型在四种条件下的碰撞次数热图，颜色越深碰撞越多；（中、右）增强前后的碰撞变化量，绿色=改善，红色=退化。B+和B从数据增强中显著受益，C/D/E反而退化。}
+\label{fig:ablation_heatmap}
+\end{figure}
 
 数据增强的效果呈现出清晰的架构依赖性：仅对\textbf{基于 CNN 的编码器}（B+ 的 MambaVision 混合架构、B 的深度可分离卷积）有显著的正面效果，B+ 从 3 次降至 1 次，B 从 DNF 救活至 3 次。而具有 SSM 编码器或混合结构的架构（C、D、E）在数据增强后性能反而下降。这说明数据增强通过增加视觉多样性提升了 CNN 的特征泛化能力，但 SSM 的序列处理机制对低层次图像扰动较为敏感——过强的视觉扰动可能破坏 SSM 已学习的精确状态转移映射。
 
