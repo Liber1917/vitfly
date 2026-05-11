@@ -58,13 +58,115 @@
 \newcommand{\songti}{\CJKfamily{SimSun}}
 \newcommand{\heiti}{\CJKfamily{SimHei}}
 
-\title{基于神经网络的四旋翼飞行器端到端视觉避障}
-\author{邢锦文\\东北大学}
-\date{}
+% ─── Cover page info ───
+\newcommand{\thesisid}{}           % 学号
+\newcommand{\thesisclassify}{}     % 密级
+\newcommand{\thesistitlecn}{基于神经网络的四旋翼飞行器端到端视觉避障}
+\newcommand{\thesistitleen}{End-to-End Visual Obstacle Avoidance for Quadrotors Based on Neural Networks}
+\newcommand{\thesisschool}{信息科学与工程学院}
+\newcommand{\thesismajor}{自动化}
+\newcommand{\thesisauthor}{邢锦文}
+\newcommand{\thesissupervisor}{XXX教授}
+\newcommand{\thesisdate}{二〇二六年六月}
 
 \begin{document}
 
-\maketitle
+% ======================================================================
+% 封面页（中文）
+% ======================================================================
+\thispagestyle{empty}
+\begin{center}
+\vspace*{0.5cm}
+
+\parbox{\textwidth}{\heiti\fontsize{12}{15}\selectfont
+学号\quad \thesisid \hfill 密级\underline{\makebox[3cm]{\thesisclassify}}}
+
+\vspace{3cm}
+
+{\heiti\fontsize{26}{30}\selectfont 东北大学本科毕业论文}
+
+\vspace{2.5cm}
+
+{\heiti\fontsize{22}{26}\selectfont \thesistitlecn}
+
+\vspace{3.5cm}
+
+{\heiti\fontsize{14}{18}\selectfont
+学\quad 院\quad 名\quad 称：\thesisschool \\[10pt]
+专\quad 业\quad 名\quad 称：\thesismajor \\[10pt]
+学\quad 生\quad 姓\quad 名：\thesisauthor \\[10pt]
+指\quad 导\quad 教\quad 师：\thesissupervisor
+}
+
+\vspace{2.5cm}
+
+{\heiti\fontsize{14}{18}\selectfont \thesisdate}
+
+\end{center}
+
+\cleardoublepage
+
+% ======================================================================
+% 封面页（英文）
+% ======================================================================
+\thispagestyle{empty}
+\begin{center}
+\vspace*{4cm}
+
+{\fontsize{22}{26}\selectfont \thesistitleen}
+
+\vspace{3cm}
+
+{\fontsize{16}{20}\selectfont
+by \\[12pt]
+\thesisauthor
+}
+
+\vspace{2.5cm}
+
+{\fontsize{14}{18}\selectfont
+Supervisor: \thesissupervisor
+}
+
+\vspace{2.5cm}
+
+{\fontsize{16}{20}\selectfont
+Northeastern University \\[8pt]
+June 2026
+}
+
+\end{center}
+
+\cleardoublepage
+
+% ======================================================================
+% 郑重声明
+% ======================================================================
+\thispagestyle{plain}
+\addcontentsline{toc}{section}{郑重声明}
+\begin{center}
+{\heiti\fontsize{18}{22}\selectfont 郑 重 声 明}
+\end{center}
+
+\vspace{1cm}
+
+\parindent=2em
+
+本人呈交的学位论文，是在导师的指导下，独立进行研究工作所取得的成果，所有数据、图片资料真实可靠。尽我所知，除文中已经注明引用的内容外，本学位论文的研究成果不包含他人享有著作权的内容。对本论文所涉及的研究工作做出贡献的其他个人和集体，均已在文中以明确的方式标明。本学位论文的知识产权归属于培养单位。
+
+\vspace{2cm}
+
+\begin{flushright}
+本人签名：\underline{\makebox[4.5cm]{}} \qquad 日期：\underline{\makebox[1.5cm]{}}年\underline{\makebox[1.2cm]{}}月\underline{\makebox[1.2cm]{}}日
+\end{flushright}
+
+\cleardoublepage
+
+% ======================================================================
+% 摘要（中文）
+% ======================================================================
+\pagenumbering{Roman}
+\setcounter{page}{1}
 
 \begin{abstract}
 四旋翼无人机在复杂环境中的高速自主避障是机器人领域的核心挑战。端到端视觉避障方法通过深度神经网络直接将传感器输入映射为控制指令，避免了传统模块化方法中感知-建图-规划各环节之间的累积误差。本文围绕"如何设计和优化适用于四旋翼避障的端到端神经网络架构"这一核心问题，对六种基于Mamba的状态空间模型架构进行了系统的比较评估，并结合跨架构知识蒸馏技术从ViT+LSTM教师模型中迁移知识。在Flightmare仿真器的60m障碍赛道上，本文在球体和树木两种环境中开展了多速度评估（5m/s和7m/s），总计完成60+轮训练和数百次仿真测试。
@@ -73,9 +175,35 @@
 
 \textbf{关键词：}Mamba；状态空间模型；知识蒸馏；四旋翼飞行器；视觉避障
 \end{abstract}
+
+\cleardoublepage
+
+% ======================================================================
+% ABSTRACT（英文）
+% ======================================================================
+\begin{center}
+{\fontsize{18}{22}\selectfont ABSTRACT}
+\end{center}
+\addcontentsline{toc}{section}{ABSTRACT}
+
+\vspace{0.8cm}
+
+Autonomous quadrotor flight in cluttered environments demands vision-based control policies that are simultaneously accurate, lightweight, and fast. This thesis addresses the core question of how to design and optimize end-to-end neural network architectures for this task, presenting a systematic comparison of six Mamba-based State Space Model (SSM) architectures for visual obstacle avoidance, combined with cross-architecture knowledge distillation from a ViT+LSTM teacher.
+
+We evaluate six student architectures spanning the current SSM design space: VMamba+LSTM~(A), MambaVision+SSM~(B), MambaVision+Mamba-3~(B+), CNN+Mamba-3~(C), STH-Mamba~(D), and lightweight CNN+SSM / DecisionMamba~(E). Training and testing are conducted in the Flightmare simulator on a 60\,m obstacle course with spheres and trees at 5\,m/s and 7\,m/s, totaling 60+ training runs and hundreds of simulated flight tests.
+
+Our results yield several key findings. First, DecisionMamba (2.19\,M parameters, 7.1\,ms inference) achieves the best overall performance with only 1 crash. Second, cross-architecture distillation dramatically improves all student models: B+ and E are elevated from 3 crashes to 1 crash, surpassing the teacher's 2 crashes, while distilled E achieves the finest control quality (MAE = 0.220, jerk = 0.023). Third---and most critically---we discover a hard constraint on distillation success: the student encoder must preserve spatial structure. CNN encoders align with ViT features via MSE, whereas pure SSM encoders that flatten spatial dimensions through scanning cause alignment to fail entirely (gt\_loss surges from 0.02 to 0.83), making distillation counterproductive. Baseline experiments with G\_basic (CNN+MLP, 0.49\,M) and G\_lstm (CNN+LSTM, $\sim$0.8\,M) further quantify the inherent limitations of behavior cloning, exhibiting 5--8$\times$ larger MAE tracking errors than distilled models.
+
+These findings provide actionable design guidelines and boundary conditions for applying cross-architecture knowledge distillation in robot learning, demonstrating that lightweight SSM-based architectures---when properly designed with structure-preserving encoders---can outperform their teachers through distillation.
+
+\vspace{0.5cm}
+\textbf{Keywords:} Mamba; State Space Model; Knowledge Distillation; Quadrotor; Visual Obstacle Avoidance; End-to-End Learning
+
 \clearpage
-\pagenumbering{Roman}
-\setcounter{page}{1}
+
+% ======================================================================
+% 目录
+% ======================================================================
 \tableofcontents
 \newpage
 \listoffigures
@@ -773,6 +901,7 @@ E 蒸馏 & 3 & 4 \\
 
 \bibliography{references}
 
+\cleardoublepage
 \section*{致谢}
 本论文的完成离不开导师的悉心指导和实验室同学们的热心帮助。感谢在四旋翼飞行器避障研究领域给予我启发的所有学者。感谢家人的支持与鼓励。
 % ============================================================
