@@ -190,9 +190,9 @@ June 2026
 
 Autonomous quadrotor flight in cluttered environments demands vision-based control policies that are simultaneously accurate, lightweight, and fast. This thesis addresses the core question of how to design and optimize end-to-end neural network architectures for this task, presenting a systematic comparison of six Mamba-based State Space Model (SSM) architectures for visual obstacle avoidance, combined with cross-architecture knowledge distillation from a ViT+LSTM teacher.
 
-We evaluate six student architectures spanning the current SSM design space: VMamba+LSTM~(A), MambaVision+SSM~(B), MambaVision+Mamba-3~(B+), CNN+Mamba-3~(C), STH-Mamba~(D), and lightweight CNN+SSM / DecisionMamba~(E). Training and testing are conducted in the Flightmare simulator on a 60\,m obstacle course with spheres and trees at 5\,m/s and 7\,m/s, totaling 60+ training runs and hundreds of simulated flight tests.
+We evaluate six student architectures spanning the current SSM design space: VMamba+LSTM~(A), MambaVision+SSM~(B), MambaVision+Mamba-3~(B+), CNN+Mamba-3~(C), STH-Mamba~(D), and the lightweight CNN+SSM variant DecisionMamba~(E). Training and testing were conducted in the Flightmare simulator on a 60\,m obstacle course with sphere and tree environments at 5\,m/s and 7\,m/s, encompassing 60+ training runs and hundreds of simulated flight tests.
 
-Our results yield several key findings. First, DecisionMamba (2.19\,M parameters, 7.1\,ms inference) achieves the best overall performance with only 1 crash. Second, cross-architecture distillation dramatically improves all student models: B+ and E are elevated from 3 crashes to 1 crash, surpassing the teacher's 2 crashes, while distilled E achieves the finest control quality (MAE = 0.220, jerk = 0.023). Third---and most critically---we discover a hard constraint on distillation success: the student encoder must preserve spatial structure. CNN encoders align with ViT features via MSE, whereas pure SSM encoders that flatten spatial dimensions through scanning cause alignment to fail entirely (gt\_loss surges from 0.02 to 0.83), making distillation counterproductive. Baseline experiments with G\_basic (CNN+MLP, 0.49\,M) and G\_lstm (CNN+LSTM, $\sim$0.8\,M) further quantify the inherent limitations of behavior cloning, exhibiting 5--8$\times$ larger MAE tracking errors than distilled models.
+Our results reveal several key findings. First, DecisionMamba (2.19\,M parameters, 7.1\,ms inference) achieves the best overall performance with only 1 collision. Second, cross-architecture distillation dramatically improves all student models: B+ and E are elevated from 3 collisions to 1, surpassing the teacher's 2 collisions, while distilled E attains the finest control quality (MAE = 0.220, jerk = 0.023). Third---and most critically---we identify a hard constraint on distillation success: the student encoder must preserve spatial structure. CNN encoders align with ViT features via MSE, whereas pure SSM encoders that flatten spatial dimensions through scanning cause alignment to fail entirely (gt\_loss surges from 0.02 to 0.83), rendering distillation counterproductive. Baseline experiments with G\_basic (CNN+MLP, 0.49\,M) and G\_lstm (CNN+LSTM, $\sim$0.8\,M) further quantify the inherent limitations of behavior cloning, exhibiting 5--8$\times$ larger MAE tracking errors than distilled models.
 
 These findings provide actionable design guidelines and boundary conditions for applying cross-architecture knowledge distillation in robot learning, demonstrating that lightweight SSM-based architectures---when properly designed with structure-preserving encoders---can outperform their teachers through distillation.
 
@@ -279,6 +279,8 @@ These findings provide actionable design guidelines and boundary conditions for 
 \textbf{第二，深入揭示了跨架构知识蒸馏对Mamba避障模型的影响机制及其有效性的关键条件。}本文以预训练的ViT-LSTM模型（参数量3.56M）为教师，对所有六种Mamba学生架构进行了系统的跨架构蒸馏实验。结果表明，蒸馏的有效性高度依赖于学生编码器的架构类型：具有CNN或混合CNN编码器的学生架构（如B+和E）从蒸馏中获益最为显著，碰撞次数从3次降至1次，甚至超越了教师自身的性能水平；而采用纯选择性扫描SSM编码器的架构（如A）从蒸馏中获得的提升极为有限。进一步的机理分析实验（E-SSM变体对比）表明，这一差异的本质在于教师与学生编码器在\textbf{特征表示空间中的对齐成本}——CNN编码器通过卷积操作天然保留了特征的二维空间结构，其输出空间与ViT教师的特征空间具有良好的互操作性，可通过简单的MSE损失实现有效对齐；而纯SSM编码器因选择性扫描操作为了适配一维序列处理而将二维空间维度展平，导致MSE特征对齐完全失败。
 
 \textbf{第三，通过大规模消融实验提炼了影响Mamba避障性能的核心设计原则。}本文围绕数据增强策略、时序建模窗口长度（单步vs多步预测）、蒸馏损失权重、同架构Born-again蒸馏以及大规模伪标签数据扩充等多个维度进行了系统的消融研究。实验揭示了一系列具有理论价值和实践指导意义的设计规律：(1) 数据增强的效果呈现清晰的架构依赖性——对基于CNN的编码器架构有显著的正向作用，但对SSM编码器架构反而造成性能退化；(2) 在四旋翼避障这一特定任务中，单步预测（seq\_len = 1）在所有架构上一致优于多步预测（seq\_len > 1），表明当前帧的精确感知比长程时序记忆更为关键；(3) 编码器的视觉特征提取质量是决定最终避障性能的首要因素，其重要性超过时序头容量的复杂程度；(4) 伪标签数据扩充在低速场景下可接近蒸馏效果，但在高速分布外场景中因教师预测误差的累积而完全失效。
+
+\textbf{问题建模.} 本文研究的端到端视觉避障问题可形式化如下：设时刻 $t$ 的观测输入为深度图像 $d_t \in \mathbb{R}^{H \times W}$（$H=60, W=90$）、飞行器当前速度 $v_t \in \mathbb{R}^3$ 及姿态四元数 $q_t \in \mathbb{R}^4$，端到端避障策略 $\pi_\theta$ 输出三维速度指令 $\hat{v}_t = \pi_\theta(d_t, v_t, q_t) \in \mathbb{R}^3$。训练目标为最小化预测指令与专家速度指令 $v_t^*$ 之间的均方误差 $\mathcal{L} = \mathbb{E}[\|\hat{v}_t - v_t^*\|^2]$，评估目标为在指定飞行速度 $v_{\text{desired}}$ 下以最少碰撞次数完成长度为 $L=60$m 的障碍赛道。本文的核心研究问题为：在给定ViT+LSTM教师策略的条件下，何种Mamba架构设计和蒸馏策略能使学生策略 $\pi_\theta$ 在参数量、推理延迟和避障成功率之间取得最优权衡。
 
 \subsection{论文组织结构}
 
@@ -564,6 +566,8 @@ Branch E是本研究的核心发现之一。其视觉编码器为轻量级CNN（
 \textbf{训练配置.} 行为克隆（BC）训练 100 轮，知识蒸馏 50 轮。训练集包含 42K 条专家轨迹（由教师 ViT+LSTM 在 5~m/s 速度下收集）。优化器采用 AdamW（学习率 $10^{-4}$，权重衰减 $10^{-4}$），批大小 32，FP16 混合精度训练，学习率余弦退火调度含 500 步预热。所有实验在单张 RTX 5090 GPU（24GB 显存）上完成。每种模型配置独立训练 3 次，取最优结果进行评测。
 
 \textbf{评估指标.} （1）\textbf{碰撞次数}：全程碰撞障碍物总数，为主要评价指标；（2）\textbf{飞行时间}：完成 60m 赛道的耗时；（3）\textbf{推理延迟}：单帧前向传播时间，反映模型的实时性。
+
+\textbf{实验方案总览.} 本文整体实验方案按"建立基线→引入蒸馏→深度消融"三个层次递进设计。主实验部分：6种架构 $\times$ 2种训练策略（BC与蒸馏）$\times$ 2种飞行速度（5m/s, 7m/s）$\times$ 2种障碍物环境（球体、树木）= 48组主要对照实验，覆盖速度鲁棒性与环境泛化的完整评估。消融实验部分：围绕数据增强（5种架构 $\times$ 2种环境 = 10组）、多步预测（2种最优架构 $\times$ 4种步长 $\times$ 2种训练方式 = 16组）、蒸馏损失权重（4种组合）、Born-again蒸馏（2种配置）和伪标签规模化五个维度开展系统消融，共计20余组实验。综合统计：本文累计完成60余轮训练和100余次Flightmare仿真测试。
 
 \textbf{分布式实验架构.} 实验采用双Agent流水线架构：训练Agent（AutoDL云服务器，RTX 5090）负责模型设计与训练，仿真Agent（本地WSL2 + ROS Noetic + Flightmare）负责60m赛道评测。两者通过GitHub仓库异步通信，形成"训练→提交→拉取→仿真→回传"的闭环流水线，如图~\ref{fig:pipeline}所示。
 
@@ -897,15 +901,13 @@ E 蒸馏 & 3 & 4 \\
 
 本文围绕"如何设计和优化适用于四旋翼避障的端到端神经网络架构"这一核心问题，对六种基于Mamba的状态空间模型架构——VMamba+LSTM（架构A）、MambaVision+SSM（架构B）、MambaVision+Mamba-3（架构B+）、CNN+Mamba3（架构C）、STH-Mamba（架构D）、DecisionMamba（架构E）——在Flightmare仿真器\cite{shah2017flightmare}上的端到端视觉避障性能进行了系统性的比较评估。本文设计了跨架构知识蒸馏框架，将ViT+LSTM教师模型\cite{bhattacharya2024vitfly}的知识迁移至Mamba学生模型，并系统研究了蒸馏在不同环境（球体、树木）和不同飞行速度（5m/s、7m/s）下的有效性边界。
 
-本文完成了大规模、多维度、系统化的实验工作。整个实验方案的设计遵循了"先建立基线、再引入蒸馏、最后消融验证"的递进逻辑，整体实验方案可归纳为以下三个层次。\textbf{主实验部分：}六种架构 $\times$ 两种训练策略（行为克隆与知识蒸馏）$\times$ 两种飞行速度（5m/s、7m/s）$\times$ 两种障碍物环境（球体、树木）$= 6 \times 2 \times 2 \times 2 = 48$ 组主要对照实验，涵盖了完整的速度鲁棒性与环境泛化评估。\textbf{消融实验部分：}围绕五个关键设计维度开展了系统消融研究：（1）数据增强消融（5种架构 $\times$ 2种环境 = 10组）；（2）多步预测消融（2种最优架构 $\times$ 4种步长 $\times$ 2种训练方式 = 16组）；（3）蒸馏损失权重消融（4种权重组合）；（4）Born-again蒸馏（2种配置）；（5）伪标签规模化。消融实验共计20余组，全面刻画了各设计因素对避障性能的影响规律。\textbf{综合统计：}本文累计完成60余轮训练和100余次Flightmare仿真测试，全文引用44篇参考文献，包含9幅图表和6张数据表，并在附录中提供了完整的架构参数分解、消融实验数据、训练损失曲线分析和代码开源信息。\textbf{论文组织：}全文共五章，依次为绪论（研究背景与现状）、相关理论与技术基础（BC、Mamba数学原理与知识蒸馏）、架构设计与蒸馏方法（六种Mamba架构设计及两组验证实验）、实验结果与分析（主实验、速度鲁棒性、环境泛化、六类消融实验）和本章总结与展望，附录包括五部分补充材料。
-
 基于上述系统性工作，本文得出以下核心结论：DecisionMamba（轻量CNN编码器+SSM时序头）在推理速度（7.1ms/帧，比ViT+LSTM快21\%）、碰撞次数（蒸馏后1次，超越教师的2次）和控制精度（MAE追踪误差0.220，优于教师的0.346）三个维度上均是整体最优配置。然而，G\_basic多种子对照实验（4个种子，2.8$\pm$1.3次碰撞）表明在T=1单帧决策下SSM时序头的独立贡献高度边际化——E的性能优势主要来自其编码器容量和蒸馏增益，而非SSM时序建模范式本身。SSM头的真正价值体现在高速速度鲁棒性（7m/s下E保持1次碰撞）。跨架构蒸馏的核心前提是编码器保留空间结构，本文通过E-SSM实验将其上升为一般性设计指南。G\_basic（MAE=1.255）和G\_lstm（MAE=1.271）的追踪误差是蒸馏模型（0.220）的5.7倍，揭示了BC训练在控制质量上的固有局限。本文通过系统实验提炼了架构设计的边界条件——包括参数分配原则（编码器优先）、数据增强的架构依赖性、伪标签的速度鲁棒性局限——为端到端避障中的架构选择提供了可操作的设计参考。
 
 \subsection{主要创新点}
 
 本文的主要创新点可归纳为以下三个方面：
 
-（1）\textbf{首次系统比较多种SSM架构在四旋翼控制中的适用性。} 据本文所知，本文是第一项在统一的训练框架、数据集和评估协议下，对SS2D扫描（VMamba）、MambaVision混合架构、纯CNN和STH-Mamba四种编码器范式与LSTM、基础SSM、Mamba-2和Mamba-3四种时序头实现进行全组合对比的系统性研究。通过控制变量的横向对比方法，将编码器类型、时序头结构和参数分配策略分离为独立的设计维度，量化了各维度对避障性能的独立贡献。结合G系列对照实验（CNN+MLP、CNN+LSTM）和控制质量追踪（MAE）分析，揭示了SSM时序头在T=1下的独立贡献高度边际化，为架构设计中"优先保障编码器质量"的原则提供了量化依据。
+（1）\textbf{首次在四旋翼控制任务中对多种SSM架构进行系统性实证评估。} 据本文所知，本文是第一项在统一的训练框架、数据集和评估协议下，对SS2D扫描（VMamba）、MambaVision混合架构、纯CNN和STH-Mamba四种编码器范式与LSTM、基础SSM、Mamba-2和Mamba-3四种时序头实现进行全组合对比的系统性实证研究。通过控制变量的横向对比方法，将编码器类型、时序头结构和参数分配策略分离为独立的设计维度，量化了各维度对避障性能的独立贡献。结合G系列对照实验（CNN+MLP、CNN+LSTM）和控制质量追踪（MAE）分析，揭示了SSM时序头在T=1下的独立贡献高度边际化，为架构设计中"优先保障编码器质量"的原则提供了量化依据。
 
 （2）\textbf{首次明确跨架构蒸馏在机器人视觉控制中的成功条件，并提炼为一般性设计原则。} 本文通过E-SSM对比实验揭示了一个关键发现：跨架构蒸馏可行性的本质条件是学生编码器保留空间结构。CNN编码器因其卷积操作天然保持特征的2D空间排列，可通过简单的MSE损失与ViT教师特征有效对齐（$\mathcal{L}_{\text{feat}}=0.85$）；而纯SSM编码器因选择性扫描操作将2D空间维度展平为1D序列，导致MSE特征对齐完全失败（$\mathcal{L}_{\text{feat}}=10.58$，$\mathcal{L}_{\text{GT}}$从0.02恶化至0.83）。更重要的是，本文超越了"SSM编码器不适合蒸馏"这一具体结论，将该发现上升为\textbf{"空间结构保留是跨架构蒸馏的必要前提"}的一般性设计指南：在进行跨架构知识迁移时，首先确认学生编码器的输出特征空间与教师编码器是否具有空间结构上的兼容性，是决定蒸馏成败的首要条件。这一原则不仅适用于本文的四旋翼避障任务，对未来SSM架构设计者选择蒸馏方案也具有直接的指导意义。
 
