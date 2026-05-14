@@ -12,48 +12,44 @@
         </mxCell>
 
         <!-- Input -->
-        <mxCell id="in" value="Depth&#xa;60×90" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0F0F0;strokeColor=#000;strokeWidth=1.5;fontSize=10;fontFamily=SimSun;fontColor=#000;" vertex="1" parent="1">
-          <mxGeometry x="20" y="100" width="65" height="50" as="geometry" />
+        <mxCell id="in" value="Depth&#xa;60&#xd7;90" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0F0F0;strokeColor=#000;strokeWidth=1.5;fontSize=10;fontFamily=SimSun;fontColor=#000;" vertex="1" parent="1">
+          <mxGeometry x="20" y="140" width="80" height="50" as="geometry" />
         </mxCell>
 
-                <mxCell id="enc_0" value="Stem 7×7 s4" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0E0E0;strokeColor=#000;strokeWidth=0.8;fontSize=7;fontFamily=SimSun;fontColor=#000;" vertex="1" parent="1">
-          <mxGeometry x="100" y="139" width="80" height="50" as="geometry" />
+        <mxCell id="enc_0" value="Stem 7&#xd7;7 s4" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0E0E0;strokeColor=#000;strokeWidth=0.8;fontSize=7;fontFamily=SimSun;fontColor=#000;" vertex="1" parent="1">
+          <mxGeometry x="94" y="225" width="80" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="enc_1" value="DWConv+MLP
-×2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D4D4D4;strokeColor=#000;strokeWidth=0.8;fontSize=7;fontFamily=SimSun;fontColor=#000;" vertex="1" parent="1">
-          <mxGeometry x="105" y="121" width="80" height="50" as="geometry" />
+        <mxCell id="enc_1" value="DWConv+MLP&#xa;&#xd7;2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D4D4D4;strokeColor=#000;strokeWidth=0.8;fontSize=7;fontFamily=SimSun;fontColor=#000;" vertex="1" parent="1">
+          <mxGeometry x="102" y="165" width="80" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="enc_2" value="DWConv+MLP
-×2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8C8C8;strokeColor=#000;strokeWidth=0.8;fontSize=7;fontFamily=SimSun;fontColor=#000;" vertex="1" parent="1">
-          <mxGeometry x="110" y="103" width="80" height="50" as="geometry" />
+        <mxCell id="enc_2" value="DWConv+MLP&#xa;&#xd7;2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8C8C8;strokeColor=#000;strokeWidth=0.8;fontSize=7;fontFamily=SimSun;fontColor=#000;" vertex="1" parent="1">
+          <mxGeometry x="110" y="105" width="80" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="enc_3" value="DWConv+MLP
-×2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#B8B8B8;strokeColor=#000;strokeWidth=0.8;fontSize=7;fontFamily=SimSun;fontColor=#000;" vertex="1" parent="1">
-          <mxGeometry x="115" y="85" width="80" height="50" as="geometry" />
+        <mxCell id="enc_3" value="DWConv+MLP&#xa;&#xd7;2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#B8B8B8;strokeColor=#000;strokeWidth=0.8;fontSize=7;fontFamily=SimSun;fontColor=#000;" vertex="1" parent="1">
+          <mxGeometry x="118" y="45" width="80" height="50" as="geometry" />
         </mxCell>
         <mxCell id="enc_note" value="512-dim" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=7;fontFamily=Times New Roman;fontColor=#666;fontStyle=italic;" vertex="1" parent="1">
-          <mxGeometry x="100" y="140" width="80" height="15" as="geometry" />
+          <mxGeometry x="94" y="290" width="80" height="12" as="geometry" />
         </mxCell>
 
 
         <!-- Concat -->
         <mxCell id="cat" value="Concat&#xa;+vel+quat" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0E0E0;strokeColor=#000;strokeWidth=1.2;fontSize=8;fontFamily=SimSun;fontColor=#000;" vertex="1" parent="1">
-          <mxGeometry x="210" y="105" width="55" height="40" as="geometry" />
+          <mxGeometry x="210" y="145" width="80" height="40" as="geometry" />
         </mxCell>
 
         <!-- Temporal Head -->
-        <mxCell id="tem" value="Mamba-3
-Exp-trap" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D0D0D0;strokeColor=#000;strokeWidth=1.5;fontSize=9;fontFamily=SimSun;fontColor=#000;" vertex="1" parent="1">
-          <mxGeometry x="290" y="90" width="80" height="70" as="geometry" />
+        <mxCell id="tem" value="Mamba-3&#xa;Exp-trap" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D0D0D0;strokeColor=#000;strokeWidth=1.5;fontSize=9;fontFamily=SimSun;fontColor=#000;" vertex="1" parent="1">
+          <mxGeometry x="300" y="135" width="80" height="70" as="geometry" />
         </mxCell>
 
         <!-- Output -->
         <mxCell id="out" value="Velocity&#xa;(vx,vy,vz)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0F0F0;strokeColor=#000;strokeWidth=1.5;fontSize=9;fontFamily=SimSun;fontColor=#000;" vertex="1" parent="1">
-          <mxGeometry x="400" y="100" width="65" height="50" as="geometry" />
+          <mxGeometry x="410" y="145" width="80" height="50" as="geometry" />
         </mxCell>
 
         <!-- Arrows -->
-                <mxCell id="a_l1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000;strokeWidth=0.8;" edge="1" parent="1" source="enc_0" target="enc_1">
+        <mxCell id="a_l1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000;strokeWidth=0.8;" edge="1" parent="1" source="enc_0" target="enc_1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="a_l2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000;strokeWidth=0.8;" edge="1" parent="1" source="enc_1" target="enc_2">
