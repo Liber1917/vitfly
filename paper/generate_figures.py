@@ -43,15 +43,18 @@ def fig3_latency():
     ax1.axhline(y=16.7, color='black', linestyle='--', linewidth=0.6, label='60Hz limit')
     ax1.legend(fontsize=7)
 
-    # Scatter — marker shapes, no color
+    # Scatter — marker shapes, no labels, use shared legend
     markers = ['o','s','^','D','v','p','*','h','<']
+    scatters = []
     for i,m in enumerate(models):
         sz = 60 if m=='E' else 35
-        ax2.scatter(par[i], lat[i], s=sz, c='white', edgecolors='black',
-                   linewidths=0.8, marker=markers[i], zorder=5)
-        ax2.annotate(m, (par[i],lat[i]), (par[i]+0.08,lat[i]+0.5), fontsize=7)
+        s = ax2.scatter(par[i], lat[i], s=sz, c='white', edgecolors='black',
+                       linewidths=0.8, marker=markers[i], zorder=5)
+        scatters.append(s)
     ax2.set_xlabel('Parameters (M)'); ax2.set_ylabel('Inference Latency (ms)')
     ax2.set_xlim(0,4.2)
+    ax2.legend(scatters, models, loc='upper left', fontsize=6.5, ncol=2,
+               framealpha=0.85, markerscale=0.7)
 
     plt.tight_layout(); plt.savefig(f'{OUTPUT}/figure3.pdf'); plt.close()
     print('figure3.pdf done')
