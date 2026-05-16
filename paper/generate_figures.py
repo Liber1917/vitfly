@@ -115,17 +115,19 @@ def fig1_overview():
         ax1.annotate('', xy=(lx+0.12, ly+0.16), xytext=(lx+0.12, 0.79),
                     arrowprops=dict(arrowstyle='->', lw=0.5, color='0.4'))
 
-    # Student box (bottom) — wider
+    # Student box (bottom)
     ax1.add_patch(mpatches.FancyBboxPatch((0.02,0.20), 0.96, 0.30, boxstyle='round,pad=0.02',
                   fc='0.3', ec='black', lw=0.8))
     ax1.text(0.5, 0.47, 'Mamba Students (6 architectures)', ha='center', va='center',
             fontsize=8, fontweight='bold', color='white')
-    branches = ['A: VMamba+LSTM', 'B: MambaVision+SSM', 'B+: MambaVision+Mamba3',
-                'C: CNN+Mamba3', 'D: STH-Mamba', 'E: DecisionMamba']
-    for i,b in enumerate(branches):
+    # 2-char tags + full names, left/right aligned within box
+    branches = [('A', 'VMamba+LSTM'), ('B', 'MambaVision+SSM'), ('B+','MambaVision+Mamba3'),
+                ('C', 'CNN+Mamba3'),      ('D', 'STH-Mamba'),       ('E', 'DecisionMamba')]
+    for i,(tag,name) in enumerate(branches):
         col = i % 2; row = i // 2
-        ax1.text(0.13 + col*0.42, 0.40 - row*0.08, b, fontsize=5.2, color='white',
-                ha='center', va='center', family='monospace')
+        cx = 0.10 + col * 0.45; cy = 0.40 - row * 0.08
+        ax1.text(cx, cy, f'({tag})  {name}', fontsize=5.2, color='white',
+                ha='left', va='center')
 
     # Arrows from each loss to student
     for i in range(3):
