@@ -91,23 +91,40 @@ def fig1_overview():
     fig,(ax1,ax2) = plt.subplots(1,2,figsize=FIG_W,
                                  gridspec_kw={'width_ratios':[1,1.3]})
     ax1.axis('off')
-    # Framework schematic — grayscale boxes
-    y0 = 0.7; bw, bh = 0.35, 0.18
-    ax1.add_patch(mpatches.FancyBboxPatch((0.1,y0),bw,bh,boxstyle='round',fc='0.85',ec='black'))
-    ax1.text(0.275, y0+bh/2, 'ViT+LSTM\nTeacher', ha='center', va='center', fontsize=8)
-    # Loss labels
-    for i,ls in enumerate([r'$L_{feat}$',r'$L_{distill}$',r'$L_{GT}$']):
-        ax1.text(0.55,0.68-i*0.06,ls,fontsize=7,bbox=dict(boxstyle='round',fc='white',ec='gray'))
-    # Student boxes
-    sts = ['VMamba\n+LSTM','MambaV\n+SSM','MambaV\n+Mamba3','CNN+\nMamba3','STH-\nMamba','Decision\nMamba']
+    ax1.set_xlim(0, 1.0); ax1.set_ylim(0, 1.0)
+
+    # Teacher box (top-right)
+    bw, bh = 0.32, 0.12
+    ax1.add_patch(mpatches.FancyBboxPatch((0.52,0.80), bw, bh, boxstyle='round,pad=0.02',
+                  fc='0.85', ec='black', lw=0.8))
+    ax1.text(0.52+bw/2, 0.80+bh/2, 'ViT+LSTM\nTeacher', ha='center', va='center', fontsize=8)
+
+    # 6 Student boxes (left column, evenly spaced)
+    sts = ['VMamba+LSTM (A)', 'MambaVision+SSM (B)', 'MambaVision+Mamba3 (B+)',
+           'CNN+Mamba3 (C)', 'STH-Mamba (D)', 'DecisionMamba (E)']
+    sbh = 0.08; sbw = 0.42; start_y = 0.60
     for i,s in enumerate(sts):
-        y = 0.55-i*0.075
-        ax1.add_patch(mpatches.FancyBboxPatch((0.1,y),bw,0.06,boxstyle='round',fc=f'{0.3+i*0.08}',ec='black'))
-        ax1.text(0.275,y+0.03,s,ha='center',va='center',fontsize=5.5,color='white')
-    ax1.set_xlim(0,0.75); ax1.set_ylim(0,0.9)
+        y = start_y - i * 0.095
+        fc = f'{0.3+i*0.1:.2f}'
+        ax1.add_patch(mpatches.FancyBboxPatch((0.05,y), sbw, sbh, boxstyle='round,pad=0.01',
+                      fc=fc, ec='black', lw=0.6))
+        ax1.text(0.05+sbw/2, y+sbh/2, s, ha='center', va='center',
+                fontsize=6.5, color='white' if i > 2 else 'black')
+
+    # Arrows: Teacher → students (vertical dashed line)
+    ax1.annotate('', xy=(0.47, 0.45), xytext=(0.47, 0.78),
+                arrowprops=dict(arrowstyle='->', lw=0.8, color='black'))
+    ax1.text(0.47, 0.62, 'Distill', rotation=90, va='center', ha='center',
+            fontsize=6.5, bbox=dict(boxstyle='round,pad=0.1', fc='white', ec='gray', lw=0.5))
+
+    # Loss labels (top-right of arrow)
+    for i,ls in enumerate([r'$\mathcal{L}_{feat}$',r'$\mathcal{L}_{distill}$',r'$\mathcal{L}_{GT}$']):
+        ax1.text(0.65, 0.65-i*0.06, ls, fontsize=7,
+                bbox=dict(boxstyle='round,pad=0.1', fc='white', ec='gray', lw=0.5))
+
     ax1.set_title('(A) Distillation Framework', fontsize=9)
 
-    # Bar chart — grayscale
+    # Right panel: Bar chart
     b1 = ax2.bar(x-w/2, bc, w, color='white', edgecolor='black', linewidth=0.8, hatch='///', label='BC')
     b2 = ax2.bar(x+w/2, dis, w, color='0.5', edgecolor='black', linewidth=0.8, hatch='\\\\', label='Distill')
     ax2.axhline(y=2, color='black', linestyle=':', linewidth=0.7, label='Teacher')
