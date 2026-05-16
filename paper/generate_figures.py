@@ -93,36 +93,49 @@ def fig1_overview():
     ax1.axis('off')
     ax1.set_xlim(0, 1.0); ax1.set_ylim(0, 1.0)
 
-    # Teacher box — center top
-    ax1.add_patch(mpatches.FancyBboxPatch((0.2,0.82), 0.6, 0.10, boxstyle='round,pad=0.02',
+    # Teacher box (top)
+    ax1.add_patch(mpatches.FancyBboxPatch((0.15,0.80), 0.7, 0.10, boxstyle='round,pad=0.02',
                   fc='0.85', ec='black', lw=0.8))
-    ax1.text(0.5, 0.87, 'ViT+LSTM Teacher', ha='center', va='center', fontsize=9, fontweight='bold')
+    ax1.text(0.5, 0.85, 'Teacher: ViT + LSTM (3.56M)', ha='center', va='center',
+            fontsize=8, fontweight='bold')
 
-    # Down arrow
-    ax1.annotate('', xy=(0.5,0.72), xytext=(0.5,0.80),
-                arrowprops=dict(arrowstyle='->', lw=1.0, color='black'))
+    # Three loss channels (middle row)
+    loss_names = [r'$L_{feat}$', r'$L_{distill}$', r'$L_{GT}$']
+    loss_desc = ['Feature\nAlignment', 'Output\nDistillation', 'Ground Truth\nSupervision']
+    loss_colors = ['0.75', '0.65', '0.55']
+    loss_xs = [0.15, 0.38, 0.61]
+    for i in range(3):
+        lx = loss_xs[i]; ly = 0.57
+        ax1.add_patch(mpatches.FancyBboxPatch((lx,ly), 0.20, 0.16, boxstyle='round,pad=0.02',
+                      fc=loss_colors[i], ec='black', lw=0.6))
+        ax1.text(lx+0.10, ly+0.12, loss_names[i], ha='center', va='center',
+                fontsize=8, fontweight='bold')
+        ax1.text(lx+0.10, ly+0.04, loss_desc[i], ha='center', va='center',
+                fontsize=5.5, color='black')
+        # Down arrow from teacher to each loss
+        ax1.annotate('', xy=(lx+0.10, ly+0.16), xytext=(lx+0.10, 0.79),
+                    arrowprops=dict(arrowstyle='->', lw=0.5, color='0.4'))
 
-    # 6 Student boxes — 2 columns x 3 rows
-    labels = ['VMamba+LSTM', 'MambaVision+SSM', 'MambaVision+Mamba3',
-              'CNN+Mamba3', 'STH-Mamba', 'DecisionMamba']
-    tags = ['(A)','(B)','(B+)','(C)','(D)','(E)']
-    box_w, box_h = 0.38, 0.085
-    cols = [0.08, 0.54]
-    for i in range(6):
+    # Student box (bottom)
+    ax1.add_patch(mpatches.FancyBboxPatch((0.05,0.22), 0.9, 0.28, boxstyle='round,pad=0.02',
+                  fc='0.3', ec='black', lw=0.8))
+    ax1.text(0.5, 0.46, 'Mamba Students', ha='center', va='center',
+            fontsize=8, fontweight='bold', color='white')
+    # 6 branch labels inside student box
+    branches = ['A: VMamba+LSTM', 'B: MambaVision+SSM', 'B+: MambaVision+Mamba3',
+                'C: CNN+Mamba3', 'D: STH-Mamba', 'E: DecisionMamba']
+    for i,b in enumerate(branches):
         col = i % 2; row = i // 2
-        cx = cols[col]; cy = 0.48 - row * 0.105
-        fc = f'{0.3+row*0.15:.2f}'
-        ax1.add_patch(mpatches.FancyBboxPatch((cx,cy), box_w, box_h, boxstyle='round,pad=0.01',
-                      fc=fc, ec='black', lw=0.6))
-        ax1.text(cx+box_w/2, cy+box_h/2, f'{tags[i]} {labels[i]}',
-                ha='center', va='center', fontsize=6.5,
-                color='white' if row > 0 else 'black')
+        ax1.text(0.15 + col*0.42, 0.39 - row*0.075, b, fontsize=5.5, color='white',
+                ha='center', va='center')
 
-    # Arrow from teacher to students
-    ax1.plot([0.5,0.27,0.27], [0.72,0.72,0.59], 'k-', lw=0.6, clip_on=False)
-    ax1.plot([0.5,0.28,0.28], [0.72,0.72,0.38], 'k-', lw=0.6, clip_on=False)
+    # Arrows from each loss to student
+    for i in range(3):
+        lx = loss_xs[i]
+        ax1.annotate('', xy=(lx+0.10, 0.50), xytext=(lx+0.10, 0.555),
+                    arrowprops=dict(arrowstyle='->', lw=0.5, color='0.4'))
 
-    ax1.set_title('(A) Distillation Framework', fontsize=9)
+    ax1.set_title('(A) Cross-Architecture Distillation Framework', fontsize=9)
 
     # Right panel: Bar chart
     b1 = ax2.bar(x-w/2, bc, w, color='white', edgecolor='black', linewidth=0.8, hatch='///', label='BC')
