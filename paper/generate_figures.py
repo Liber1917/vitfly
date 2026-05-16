@@ -38,7 +38,7 @@ def fig3_latency():
     bars = ax1.bar(x, lat, color='white', edgecolor='black', linewidth=0.8)
     for i,b in enumerate(bars):
         b.set_hatch(HATCHES[i%len(HATCHES)])
-    ax1.set_xticks(x); ax1.set_xticklabels(models, fontsize=8)
+    ax1.set_xticks(x); ax1.set_xticklabels(models, fontsize=7, rotation=30, ha='right')
     ax1.set_ylabel('Inference Latency (ms)')
     ax1.axhline(y=16.7, color='black', linestyle='--', linewidth=0.6, label='60Hz limit')
     ax1.legend(fontsize=7)
