@@ -91,98 +91,84 @@ def make_radar():
 
 # ═══════════════════════════════════════════════════════════════
 # FIGURE 2: MULTI-METRIC SCATTER (PARETO FRONTIER)
-# ═══════════════════════════════════════════════════════════════
 def make_pareto():
-    models = ['E.dist', 'B+.dist', 'B.dist', 'D.BC', 'D.dist', 'A.BC',
-              'A.dist', 'C.BC', 'C.dist', 'B+.BC', 'E.BC', 'G_basic', 'G_lstm']
     data = {
-        'E.dist':   (1, 7.1, 2.19),
-        'B+.dist':  (1, 9.8, 2.55),
-        'B.dist':   (2, 10.2, 2.61),
-        'D.BC':     (2, 11.5, 2.60),
-        'D.dist':   (2, 11.5, 2.60),
-        'A.BC':     (3, 24.3, 0.97),
-        'A.dist':   (3, 24.3, 0.97),
-        'C.BC':     (3, 8.5, 2.41),
-        'C.dist':   (3, 8.5, 2.41),
-        'B+.BC':    (3, 9.8, 2.55),
-        'E.BC':     (3, 7.1, 2.19),
-        'G_basic':  (4, 0.74, 0.49),
-        'G_lstm':   (4, 1.0, 0.80),
+        'E.dist':   (1, 7.1, 2.19, 'best'),
+        'B+.dist':  (1, 9.8, 2.55, 'best'),
+        'B.dist':   (2, 10.2, 2.61, 'distill'),
+        'D.dist':   (2, 11.5, 2.60, 'distill'),
+        'A.dist':   (3, 24.3, 0.97, 'distill'),
+        'C.dist':   (3, 8.5, 2.41, 'distill'),
+        'D.BC':     (2, 11.5, 2.60, 'bc'),
+        'A.BC':     (3, 24.3, 0.97, 'bc'),
+        'C.BC':     (3, 8.5, 2.41, 'bc'),
+        'B+.BC':    (3, 9.8, 2.55, 'bc'),
+        'E.BC':     (3, 7.1, 2.19, 'bc'),
+        'G_basic':  (4, 0.74, 0.49, 'g'),
+        'G_lstm':   (4, 1.0, 0.80, 'g'),
     }
     t_crash, t_lat, t_param = 2, 9.0, 3.56
 
-    fig, ax = plt.subplots(figsize=(6.5, 4.5))
+    fig, ax = plt.subplots(figsize=(7, 4.5))
 
-    # Mark regions
-    ax.axhspan(-0.5, 0.5, xmin=0, xmax=0.15, alpha=0.06, color='green')
-    ax.annotate('Ideal', xy=(2, 0.5), fontsize=8, color='green', alpha=0.6)
+    # Plot by group with distinct markers
+    groups = {
+        'best':   dict(color=C_OURS, marker='D', size=150, label='Best distill (1 crash)'),
+        'distill':dict(color='#2A9D8F', marker='o', size=80, label='Other distill models'),
+        'bc':     dict(color='#8C8C8C', marker='o', size=50, label='BC-only models'),
+        'g':      dict(color='#B0BEC5', marker='^', size=60, label='G control baselines'),
+    }
 
-    # Plot all models
-    for name, (crashes, lat, params) in data.items():
-        is_best = '.dist' in name and crashes <= 1
-        color = C_OURS if is_best else \
-                C_G_BASIC if 'G_' in name else C_OTHER
-        size = 40 + params * 30
-        edge_c = 'black' if is_best else 'none'
-        lw = 1.0 if is_best else 0.3
-        ax.scatter(lat, crashes, s=size, c=color, marker='o',
-                   edgecolors=edge_c, linewidth=lw, alpha=0.8, zorder=5)
-
-        # Label
-        offset_x, offset_y = 0.3, 0.15
-        if name == 'G_basic':
-            offset_y = -0.4
-        elif name == 'G_lstm':
-            offset_y = 0.4
-        elif name == 'A BC':
-            offset_x = -1.0
-
-        ax.annotate(name, (lat, crashes), (lat + offset_x, crashes + offset_y),
-                    fontsize=6.5, ha='left', va='bottom', alpha=0.8)
+    for name, (crashes, lat, params, group) in data.items():
+        g = groups[group]
+        ax.scatter(lat, crashes, s=g['size'] + params * 20, c=g['color'],
+                   marker=g['marker'], edgecolors='black', linewidth=0.3,
+                   alpha=0.85, zorder=5)
 
     # Teacher
-    ax.scatter(t_lat, t_crash, s=200, c=C_TEACHER, marker='s',
+    ax.scatter(t_lat, t_crash, s=250, c=C_TEACHER, marker='s',
                edgecolors='black', linewidth=1.0, zorder=6, alpha=0.9,
-               label='Teacher ViT+LSTM')
-    ax.annotate('Teacher', (t_lat, t_crash), (t_lat + 0.2, t_crash + 0.25),
-                fontsize=7, ha='left', va='bottom', fontweight='bold')
+               label='Teacher (ViT+LSTM)')
 
-    # Pareto frontier (best models only)
-    frontier_pts = [(0.74, 4), (7.1, 1), (9.8, 1)]  # G_basic, E_distill, B+_distill
+    # Pareto frontier line
+    frontier_pts = [(0.74, 4), (7.1, 1), (9.8, 1)]
     frontier_pts.sort()
     xs, ys = zip(*frontier_pts)
-    ax.plot(xs, ys, '--', color='#2A9D8F', linewidth=1.2, alpha=0.5, zorder=1)
-    ax.annotate('Pareto frontier', (2, 3), fontsize=7.5, color='#2A9D8F',
-                fontstyle='italic', alpha=0.6)
+    ax.plot(xs, ys, '--', color='#2A9D8F', linewidth=1.2, alpha=0.4, zorder=1)
+    ax.annotate('Pareto frontier', (5, 2.5), fontsize=7.5, color='#2A9D8F',
+                fontstyle='italic', alpha=0.5)
 
     ax.set_xlabel('Inference Latency (ms)')
     ax.set_ylabel('Collisions (60m course)')
-    ax.set_title('Performance Pareto Frontier: Latency vs Collisions\n(marker size ~ parameters)', fontsize=11)
+    ax.set_title('Performance Pareto Frontier: Latency vs Collisions\n(marker size proportional to parameter count)', fontsize=11)
 
     ax.set_xlim(-1, 28)
-    ax.set_ylim(0, 5.5)
+    ax.set_ylim(-0.3, 5.3)
     ax.xaxis.set_major_locator(ticker.MultipleLocator(5))
     ax.yaxis.set_major_locator(ticker.MultipleLocator(1))
 
-    # Legend proxies
+    # Legend: all four groups + teacher
     from matplotlib.lines import Line2D
     legend_elements = [
-        Line2D([0], [0], marker='o', color='w', markerfacecolor=C_OURS,
-               markersize=8, label='Best distill (1 crash)'),
-        Line2D([0], [0], marker='o', color='w', markerfacecolor=C_OTHER,
-               markersize=8, label='Other models'),
-        Line2D([0], [0], marker='s', color='w', markerfacecolor=C_TEACHER,
-               markersize=8, label='Teacher'),
-        Line2D([0], [0], marker='o', color='w', markerfacecolor=C_G_BASIC,
-               markersize=8, label='G baselines'),
+        Line2D([0], [0], marker='D', color='w', markerfacecolor=C_OURS, markersize=8,
+               markeredgecolor='black', markeredgewidth=0.3, label='Best distill (1 crash)'),
+        Line2D([0], [0], marker='o', color='w', markerfacecolor='#2A9D8F', markersize=6,
+               markeredgecolor='black', markeredgewidth=0.3, label='Other distill models'),
+        Line2D([0], [0], marker='o', color='w', markerfacecolor='#8C8C8C', markersize=5,
+               markeredgecolor='black', markeredgewidth=0.3, label='BC-only models'),
+        Line2D([0], [0], marker='^', color='w', markerfacecolor='#B0BEC5', markersize=6,
+               markeredgecolor='black', markeredgewidth=0.3, label='G control baselines'),
+        Line2D([0], [0], marker='s', color='w', markerfacecolor=C_TEACHER, markersize=8,
+               markeredgecolor='black', markeredgewidth=0.5, label='Teacher (ViT+LSTM)'),
+        Line2D([0], [0], linestyle='--', color='#2A9D8F', label='Pareto frontier'),
     ]
-    ax.legend(handles=legend_elements, loc='lower right', fontsize=7)
+    ax.legend(handles=legend_elements, loc='lower left', fontsize=7,
+              ncol=1, framealpha=0.85)
 
     fig.savefig(os.path.join(OUTDIR, 'fig_pareto.pdf'))
     fig.savefig(os.path.join(OUTDIR, 'fig_pareto.png'), dpi=300)
     plt.close(fig)
-    print("✓ Pareto scatter saved")
+    print("Pareto scatter saved")
 
 
 # ═══════════════════════════════════════════════════════════════
