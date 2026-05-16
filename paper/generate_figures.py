@@ -94,40 +94,38 @@ def fig1_overview():
     ax1.set_xlim(0, 1.0); ax1.set_ylim(0, 1.0)
 
     # Teacher box (top)
-    ax1.add_patch(mpatches.FancyBboxPatch((0.15,0.80), 0.7, 0.10, boxstyle='round,pad=0.02',
+    ax1.add_patch(mpatches.FancyBboxPatch((0.05,0.80), 0.9, 0.10, boxstyle='round,pad=0.02',
                   fc='0.85', ec='black', lw=0.8))
-    ax1.text(0.5, 0.85, 'Teacher: ViT + LSTM (3.56M)', ha='center', va='center',
+    ax1.text(0.5, 0.85, 'Teacher: ViT + LSTM (3.56M params)', ha='center', va='center',
             fontsize=8, fontweight='bold')
 
-    # Three loss channels (middle row)
+    # Three loss channels
     loss_names = [r'$L_{feat}$', r'$L_{distill}$', r'$L_{GT}$']
-    loss_desc = ['Feature\nAlignment', 'Output\nDistillation', 'Ground Truth\nSupervision']
+    loss_desc = ['Feature Align.', 'Output Distill.', 'GT Supervision']
     loss_colors = ['0.75', '0.65', '0.55']
-    loss_xs = [0.15, 0.38, 0.61]
+    loss_xs = [0.10, 0.38, 0.66]
     for i in range(3):
-        lx = loss_xs[i]; ly = 0.57
-        ax1.add_patch(mpatches.FancyBboxPatch((lx,ly), 0.20, 0.16, boxstyle='round,pad=0.02',
+        lx = loss_xs[i]; ly = 0.56
+        ax1.add_patch(mpatches.FancyBboxPatch((lx,ly), 0.24, 0.16, boxstyle='round,pad=0.02',
                       fc=loss_colors[i], ec='black', lw=0.6))
-        ax1.text(lx+0.10, ly+0.12, loss_names[i], ha='center', va='center',
-                fontsize=8, fontweight='bold')
-        ax1.text(lx+0.10, ly+0.04, loss_desc[i], ha='center', va='center',
-                fontsize=5.5, color='black')
-        # Down arrow from teacher to each loss
-        ax1.annotate('', xy=(lx+0.10, ly+0.16), xytext=(lx+0.10, 0.79),
+        ax1.text(lx+0.12, ly+0.12, loss_names[i], ha='center', va='center',
+                fontsize=9, fontweight='bold')
+        ax1.text(lx+0.12, ly+0.03, loss_desc[i], ha='center', va='center',
+                fontsize=6, color='black')
+        ax1.annotate('', xy=(lx+0.12, ly+0.16), xytext=(lx+0.12, 0.79),
                     arrowprops=dict(arrowstyle='->', lw=0.5, color='0.4'))
 
-    # Student box (bottom)
-    ax1.add_patch(mpatches.FancyBboxPatch((0.05,0.22), 0.9, 0.28, boxstyle='round,pad=0.02',
+    # Student box (bottom) — wider
+    ax1.add_patch(mpatches.FancyBboxPatch((0.02,0.20), 0.96, 0.30, boxstyle='round,pad=0.02',
                   fc='0.3', ec='black', lw=0.8))
-    ax1.text(0.5, 0.46, 'Mamba Students', ha='center', va='center',
+    ax1.text(0.5, 0.47, 'Mamba Students (6 architectures)', ha='center', va='center',
             fontsize=8, fontweight='bold', color='white')
-    # 6 branch labels inside student box
     branches = ['A: VMamba+LSTM', 'B: MambaVision+SSM', 'B+: MambaVision+Mamba3',
                 'C: CNN+Mamba3', 'D: STH-Mamba', 'E: DecisionMamba']
     for i,b in enumerate(branches):
         col = i % 2; row = i // 2
-        ax1.text(0.15 + col*0.42, 0.39 - row*0.075, b, fontsize=5.5, color='white',
-                ha='center', va='center')
+        ax1.text(0.13 + col*0.42, 0.40 - row*0.08, b, fontsize=5.2, color='white',
+                ha='center', va='center', family='monospace')
 
     # Arrows from each loss to student
     for i in range(3):
