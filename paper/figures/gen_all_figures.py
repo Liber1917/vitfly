@@ -81,7 +81,6 @@ def make_radar():
     ax.set_ylim(0, 1.15)
     ax.set_yticks([0.25, 0.5, 0.75, 1.0])
     ax.set_yticklabels(['0.25', '0.5', '0.75', 'Best'], fontsize=7)
-    ax.set_title('Multi-Metric Model Comparison\n(all metrics: lower is better)', pad=20, fontsize=11)
     ax.legend(loc='upper right', bbox_to_anchor=(1.35, 1.1), fontsize=7.5)
 
     fig.savefig(os.path.join(OUTDIR, 'fig_radar.pdf'))
