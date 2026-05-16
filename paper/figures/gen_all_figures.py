@@ -113,20 +113,20 @@ def make_pareto():
 
     # Plot by group with distinct markers
     groups = {
-        'best':   dict(color=C_OURS, marker='D', size=150, label='Best distill (1 crash)'),
-        'distill':dict(color='#2A9D8F', marker='o', size=80, label='Other distill models'),
-        'bc':     dict(color='#8C8C8C', marker='o', size=50, label='BC-only models'),
-        'g':      dict(color='#B0BEC5', marker='^', size=60, label='G control baselines'),
+        'best':   dict(color=C_OURS, marker='D', size=70, label='Best distill (1 crash)'),
+        'distill':dict(color='#2A9D8F', marker='o', size=40, label='Other distill models'),
+        'bc':     dict(color='#8C8C8C', marker='o', size=30, label='BC-only models'),
+        'g':      dict(color='#B0BEC5', marker='^', size=35, label='G control baselines'),
     }
 
     for name, (crashes, lat, params, group) in data.items():
         g = groups[group]
-        ax.scatter(lat, crashes, s=g['size'] + params * 20, c=g['color'],
+        ax.scatter(lat, crashes, s=g['size'] + params * 10, c=g['color'],
                    marker=g['marker'], edgecolors='black', linewidth=0.3,
                    alpha=0.85, zorder=5)
 
     # Teacher
-    ax.scatter(t_lat, t_crash, s=250, c=C_TEACHER, marker='s',
+    ax.scatter(t_lat, t_crash, s=120, c=C_TEACHER, marker='s',
                edgecolors='black', linewidth=1.0, zorder=6, alpha=0.9,
                label='Teacher (ViT+LSTM)')
 
@@ -150,15 +150,15 @@ def make_pareto():
     # Legend: all four groups + teacher
     from matplotlib.lines import Line2D
     legend_elements = [
-        Line2D([0], [0], marker='D', color='w', markerfacecolor=C_OURS, markersize=8,
+        Line2D([0], [0], marker='D', color='w', markerfacecolor=C_OURS, markersize=7,
                markeredgecolor='black', markeredgewidth=0.3, label='Best distill (1 crash)'),
-        Line2D([0], [0], marker='o', color='w', markerfacecolor='#2A9D8F', markersize=6,
+        Line2D([0], [0], marker='o', color='w', markerfacecolor='#2A9D8F', markersize=5,
                markeredgecolor='black', markeredgewidth=0.3, label='Other distill models'),
-        Line2D([0], [0], marker='o', color='w', markerfacecolor='#8C8C8C', markersize=5,
+        Line2D([0], [0], marker='o', color='w', markerfacecolor='#8C8C8C', markersize=4,
                markeredgecolor='black', markeredgewidth=0.3, label='BC-only models'),
-        Line2D([0], [0], marker='^', color='w', markerfacecolor='#B0BEC5', markersize=6,
+        Line2D([0], [0], marker='^', color='w', markerfacecolor='#B0BEC5', markersize=5,
                markeredgecolor='black', markeredgewidth=0.3, label='G control baselines'),
-        Line2D([0], [0], marker='s', color='w', markerfacecolor=C_TEACHER, markersize=8,
+        Line2D([0], [0], marker='s', color='w', markerfacecolor=C_TEACHER, markersize=7,
                markeredgecolor='black', markeredgewidth=0.5, label='Teacher (ViT+LSTM)'),
         Line2D([0], [0], linestyle='--', color='#2A9D8F', label='Pareto frontier'),
     ]
