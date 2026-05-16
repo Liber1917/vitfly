@@ -93,34 +93,34 @@ def fig1_overview():
     ax1.axis('off')
     ax1.set_xlim(0, 1.0); ax1.set_ylim(0, 1.0)
 
-    # Teacher box (top-right)
-    bw, bh = 0.32, 0.12
-    ax1.add_patch(mpatches.FancyBboxPatch((0.52,0.80), bw, bh, boxstyle='round,pad=0.02',
+    # Teacher box — center top
+    ax1.add_patch(mpatches.FancyBboxPatch((0.2,0.82), 0.6, 0.10, boxstyle='round,pad=0.02',
                   fc='0.85', ec='black', lw=0.8))
-    ax1.text(0.52+bw/2, 0.80+bh/2, 'ViT+LSTM\nTeacher', ha='center', va='center', fontsize=8)
+    ax1.text(0.5, 0.87, 'ViT+LSTM Teacher', ha='center', va='center', fontsize=9, fontweight='bold')
 
-    # 6 Student boxes (left column, evenly spaced)
-    sts = ['VMamba+LSTM (A)', 'MambaVision+SSM (B)', 'MambaVision+Mamba3 (B+)',
-           'CNN+Mamba3 (C)', 'STH-Mamba (D)', 'DecisionMamba (E)']
-    sbh = 0.08; sbw = 0.42; start_y = 0.60
-    for i,s in enumerate(sts):
-        y = start_y - i * 0.095
-        fc = f'{0.3+i*0.1:.2f}'
-        ax1.add_patch(mpatches.FancyBboxPatch((0.05,y), sbw, sbh, boxstyle='round,pad=0.01',
+    # Down arrow
+    ax1.annotate('', xy=(0.5,0.72), xytext=(0.5,0.80),
+                arrowprops=dict(arrowstyle='->', lw=1.0, color='black'))
+
+    # 6 Student boxes — 2 columns x 3 rows
+    labels = ['VMamba+LSTM', 'MambaVision+SSM', 'MambaVision+Mamba3',
+              'CNN+Mamba3', 'STH-Mamba', 'DecisionMamba']
+    tags = ['(A)','(B)','(B+)','(C)','(D)','(E)']
+    box_w, box_h = 0.38, 0.085
+    cols = [0.08, 0.54]
+    for i in range(6):
+        col = i % 2; row = i // 2
+        cx = cols[col]; cy = 0.48 - row * 0.105
+        fc = f'{0.3+row*0.15:.2f}'
+        ax1.add_patch(mpatches.FancyBboxPatch((cx,cy), box_w, box_h, boxstyle='round,pad=0.01',
                       fc=fc, ec='black', lw=0.6))
-        ax1.text(0.05+sbw/2, y+sbh/2, s, ha='center', va='center',
-                fontsize=6.5, color='white' if i > 2 else 'black')
+        ax1.text(cx+box_w/2, cy+box_h/2, f'{tags[i]} {labels[i]}',
+                ha='center', va='center', fontsize=6.5,
+                color='white' if row > 0 else 'black')
 
-    # Arrows: Teacher → students (vertical dashed line)
-    ax1.annotate('', xy=(0.47, 0.45), xytext=(0.47, 0.78),
-                arrowprops=dict(arrowstyle='->', lw=0.8, color='black'))
-    ax1.text(0.47, 0.62, 'Distill', rotation=90, va='center', ha='center',
-            fontsize=6.5, bbox=dict(boxstyle='round,pad=0.1', fc='white', ec='gray', lw=0.5))
-
-    # Loss labels (top-right of arrow)
-    for i,ls in enumerate([r'$\mathcal{L}_{feat}$',r'$\mathcal{L}_{distill}$',r'$\mathcal{L}_{GT}$']):
-        ax1.text(0.65, 0.65-i*0.06, ls, fontsize=7,
-                bbox=dict(boxstyle='round,pad=0.1', fc='white', ec='gray', lw=0.5))
+    # Arrow from teacher to students
+    ax1.plot([0.5,0.27,0.27], [0.72,0.72,0.59], 'k-', lw=0.6, clip_on=False)
+    ax1.plot([0.5,0.28,0.28], [0.72,0.72,0.38], 'k-', lw=0.6, clip_on=False)
 
     ax1.set_title('(A) Distillation Framework', fontsize=9)
 
