@@ -130,8 +130,8 @@ ViT教师 $\to$ Mamba学生有效吗？
 \begin{frame}{方法：跨架构知识蒸馏}
 \centering
 \begin{tikzpicture}[node distance=0.4cm,font=\footnotesize]
-\node[draw,rounded corners,fill=black!10,minimum width=7cm,minimum height=0.8cm] (T)
-{\textbf{教师：ViT + LSTM (3.56M)}};
+\node[draw,rounded corners,fill=black!10,minimum width=8cm,minimum height=0.9cm] (T)
+{\textbf{教师：ViT + LSTM (3.56M)} \quad $\mathcal{L} = \alpha\|f_S-f_T\|^2 + \beta\|\hat{y}_S-\hat{y}_T\|^2 + \gamma\|\hat{y}_S-y_{\text{GT}}\|^2$};
 
 \node[draw,rounded corners,fill=positive!15,below=of T,xshift=-2.2cm,minimum width=1.8cm,minimum height=0.6cm] (L1)
 {$L_\text{feat}$\\\tiny 特征对齐};
@@ -140,19 +140,15 @@ ViT教师 $\to$ Mamba学生有效吗？
 \node[draw,rounded corners,fill=positive!35,below=of T,xshift=2.2cm,minimum width=1.8cm,minimum height=0.6cm] (L3)
 {$L_\text{GT}$\\\tiny 真值监督};
 
-\node[draw,rounded corners,fill=emphasis!10,below=of L2,minimum width=7.5cm,minimum height=1cm] (S)
+\node[draw,rounded corners,fill=emphasis!10,below=of L2,minimum width=8cm,minimum height=1cm] (S)
 {\textbf{Mamba学生 (6种变体)}\\
 A:VMamba+LSTM \ B/B+:MambaVision \ C:CNN+Mamba3 \ D:STH-Mamba \ E:DecisionMamba};
 
 \draw[->,thick] (T) -- (L1); \draw[->,thick] (T) -- (L2); \draw[->,thick] (T) -- (L3);
 \draw[->,thick] (L1) -- (S); \draw[->,thick] (L2) -- (S); \draw[->,thick] (L3) -- (S);
 \end{tikzpicture}
-
-\begin{block}{损失函数}
-\centering\footnotesize
-$\mathcal{L} = \alpha\|f_S-f_T\|^2 + \beta\|\hat{y}_S-\hat{y}_T\|^2 + \gamma\|\hat{y}_S-y_{\text{GT}}\|^2$
-\qquad ($\alpha=\beta=\gamma=1$ 消融验证最优)
-\end{block}
+\vspace{0.2cm}
+\centering\footnotesize 默认 $\alpha=\beta=\gamma=1$ (消融实验验证此为最优)
 \end{frame}
 
 % ─── SLIDE 6: ARCHITECTURES ───
