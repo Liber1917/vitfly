@@ -367,7 +367,48 @@ AI辅助执行层，输出均经人类严格审查。
 \end{columns}
 \end{frame}
 
-% ─── SLIDE 13: SUMMARY ───
+% ─── SLIDE 13: SUPPLEMENTARY DATA ───
+\begin{frame}{参数效率与泛化边界}
+\begin{columns}[T]
+\column{0.5\textwidth}
+\begin{block}{参数效率对比}
+\centering\footnotesize
+\begin{tabular}{lcc}
+\toprule
+模型 & 参数量 & 碰撞/M参数 \\
+\midrule
+G\_basic & 0.49M & 8.16 \\
+G\_lstm & 0.80M & 5.00 \\
+\HL{E 蒸馏} & 2.19M & \HL{0.46} \\
+教师 & 3.56M & 0.56 \\
+A BC & 0.97M & 3.09 \\
+\bottomrule
+\end{tabular}
+\vspace{0.1cm}
+\footnotesize G\_basic效率最高但绝对碰撞更多\\
+SSM时序头T=1下边际贡献
+\end{block}
+
+\column{0.5\textwidth}
+\begin{block}{环境泛化 (树木赛道)}
+\centering\footnotesize
+\begin{tabular}{lcc}
+\toprule
+模型 & 5m/s & 7m/s \\
+\midrule
+教师 & \HL{0} & \HL{0} \\
+B+ 蒸馏 & \HL{0} & 1 \\
+E 蒸馏 & 1 & 2 \\
+\bottomrule
+\end{tabular}
+\vspace{0.1cm}
+\footnotesize 教师零碰撞领跑 — \\
+\con{蒸馏泛化边界：学生容量限制}
+\end{block}
+\end{columns}
+\end{frame}
+
+% ─── SLIDE 14: SUMMARY ───
 \begin{frame}{总结}
 \begin{enumerate}
 \item \HL{首次系统评估6种Mamba架构在四旋翼控制中的适用性}\\
@@ -412,56 +453,6 @@ AI辅助执行层，输出均经人类严格审查。
 \Large 欢迎提问\\[1.5cm]
 \normalsize GitHub: \texttt{github.com/Liber1917/vitfly}
 \end{center}
-\end{frame}
-
-% ─── BACKUP SLIDES ───
-\appendix
-\begin{frame}{参数效率对比}
-\centering\footnotesize
-\begin{tabular}{lccc}
-\toprule
-模型 & 参数量 & 碰撞/M参数 \\
-\midrule
-G\_basic & 0.49M & 8.16 (最高) \\
-G\_lstm & 0.80M & 5.00 \\
-\HL{E 蒸馏} & 2.19M & \HL{0.46} \\
-B+ 蒸馏 & 2.55M & 0.39 \\
-教师 & 3.56M & 0.56 \\
-A BC & 0.97M & 3.09 (最差) \\
-\bottomrule
-\end{tabular}
-\vspace{0.3cm}
-G\_basic 效率最高但绝对碰撞更多 (4 vs 1) — SSM时序头在T=1下边际贡献
-\end{frame}
-
-\begin{frame}{环境泛化：树木环境}
-\centering\footnotesize
-\begin{tabular}{lcc}
-\toprule
-模型 & 5m/s & 7m/s \\
-\midrule
-教师 ViT+LSTM & \HL{0} & \HL{0} \\
-B+ 蒸馏 & \HL{0} & 1 \\
-E 蒸馏 & 1 & 2 \\
-\bottomrule
-\end{tabular}
-\vspace{0.3cm}
-教师零碰撞领跑 — \con{蒸馏泛化边界：学生容量限制}
-\end{frame}
-
-\begin{frame}{实验规模}
-\centering
-\begin{tabular}{lr}
-\toprule
-维度 & 数量 \\
-\midrule
-主要对照实验 & 6$\times$2$\times$2$\times$2 = 48组 \\
-消融实验 & 20+ 组 \\
-训练轮数 & 60+ 轮 \\
-仿真测试 & 100+ 次 \\
-参考文献 & 40 篇 \\
-\bottomrule
-\end{tabular}
 \end{frame}
 
 \end{document}
