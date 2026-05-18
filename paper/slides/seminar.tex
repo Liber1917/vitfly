@@ -1,5 +1,12 @@
 \documentclass[aspectratio=169,10pt]{beamer}
-\usepackage[UTF8]{ctex}
+\usepackage{iftex}
+\ifXeTeX
+  \usepackage[UTF8]{ctex}
+\else
+  \usepackage{CJKutf8}
+  \AtBeginDocument{\begin{CJK}{UTF8}{gbsn}}
+  \AtEndDocument{\end{CJK}}
+\fi
 \usetheme{Madrid}
 \usecolortheme{default}
 \setbeamertemplate{navigation symbols}{}
@@ -18,7 +25,7 @@
 \title[四旋翼视觉避障]{基于神经网络的四旋翼飞行器\\端到端视觉避障}
 \subtitle{Mamba架构与跨架构知识蒸馏的系统性研究}
 \author[邢锦文]{邢锦文 \quad 指导教师：芦安洋教授}
-\institute[东北大学]{信息科学与工程学院·自动化\\东北大学}
+\institute[东北大学]{信息科学与工程学院·工业智能\\东北大学}
 \date{}
 
 \begin{document}
@@ -277,7 +284,6 @@ E (CNN) & 0.85 & 0.02 \\
 教师反而退化150\%。\\
 \pos{蒸馏增强了速度鲁棒性，}\\
 \pos{超越了教师自身的适应范围。}
-\end{block}
 
 \column{0.5\textwidth}
 \begin{block}{控制质量与效率权衡}
