@@ -607,6 +607,37 @@ pid=$(ps aux | grep -E "\b$p\b" | grep -v grep | awk '{print $2}')
 **Root cause**: WSLg runs as uid 1000 (Windows user), simulation runs as root.
 **Fix**: Ignore — simulation works regardless. If RViz window doesn't appear, it's cosmetic.
 
+### 10. Conda Python Path Contamination (numpy 2.x vs cv_bridge)
+
+**Symptom**: `run_competition.py` crashes with `_ARRAY_API not found` or `AttributeError` from `cv_bridge`, even when `conda activate ros_py38` is active.
+
+```
+A module that was compiled using NumPy 1.x cannot be run in NumPy 2.4.4
+Traceback: from cv_bridge import CvBridge
+AttributeError: _ARRAY_API not found
+```
+
+**Root cause**: The base conda environment has Python 3.13 with numpy 2.x. When `PYTHONPATH` includes system site-packages or the wrong conda path, `cv2` and `cv_bridge` load from the wrong Python version. The `ros_py38` conda env (Python 3.8, numpy 1.24) is correct but the `python3` command may resolve to the system Python 3.13.
+
+**Fix**: Always use the explicit conda env Python path. Set `PYTHONPATH` to ONLY include ros_py38 site-packages, NOT system Python 3.13 paths.
+
+```bash
+# ✅ CORRECT: use explicit python path from ros_py38 env
+PY=/root/miniconda3/envs/ros_py38/bin/python3
+export PYTHONPATH=/opt/ros/noetic/lib/python3/dist-packages:$CONDA_PREFIX/lib/python3.8/site-packages:$PYTHONPATH
+
+# Verify before running:
+$PY -c "import numpy; print('numpy:', numpy.__version__); import cv_bridge; print('cv_bridge ok')"
+# Must output: numpy: 1.24.x  /  cv_bridge ok
+
+# ❌ WRONG: relies on PATH resolution which may find system Python 3.13
+python3 run_competition.py ...
+```
+
+**Diagnosis**: If `run_competition.py` produces 0 velocity outputs but prints "Initialization completed!", check `/tmp/comp_*.log` for the numpy/cv_bridge error. The model loaded but ROS node crashed before publishing.
+
+**Lesson**: When writing standalone test scripts, always use `$PY` (explicit conda python path) instead of bare `python3`. Never rely on `which python3` in a mixed-version environment.
+
 ---
 
 ## Complete Results Summary
@@ -622,6 +653,7 @@ pid=$(ps aux | grep -E "\b$p\b" | grep -v grep | awk '{print $2}')
 | C | 3 | 5 | 3 | — | — |
 | D | 2 | 5 | 2 | — | — |
 | E | 3 | 4 | **1** 🏆 | **1** 🏆 | — |
+| E-SSM | 4 | — | ❌ 蒸馏失败 | — | — |
 | Fusion (3 seeds) | 7/2/4 | — | 2/4/1→2.3μ | 4/2/2→2.7μ | — |
 | E Born-again γ=1 | — | — | 3 | — | — |
 | E Born-again γ=2 | — | — | 4 | — | — |
@@ -653,6 +685,7 @@ pid=$(ps aux | grep -E "\b$p\b" | grep -v grep | awk '{print $2}')
 7. **Default α=β=γ=1.0 is optimal**: Any deviation (grid search, γ=2.0) degrades performance.
 8. **seq_len=1 is optimal**: Multi-step (4/8/16) degrades all variants.
 9. **seq_len > 1 for Teacher untested**: Could benefit from LSTM temporal memory.
+10. **E-SSM BC (4 cr) ≈ E BC (3 cr)**: SSM encoder avoidance capability matches CNN. Distillation failure (feat_loss 0.85→10.58) is due to spatial structure incompatibility, not SSM encoder inadequacy.
 
 ### File Inventory
 
