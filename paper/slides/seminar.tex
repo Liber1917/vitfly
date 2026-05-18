@@ -34,7 +34,7 @@
 \footnotesize
 Transformer：O(n$^2$)，精度高但慢\\
 Mamba：O(n)，理论更快，但在避障任务上\\
-\ \ 到底表现如何？——\textit{没有人系统测过。}
+到底表现如何？——\textit{没有人系统测过。}
 \end{block}
 
 \begin{block}{任务场景}
@@ -62,13 +62,13 @@ Mamba：O(n)，理论更快，但在避障任务上\\
 \end{frame}
 
 % ═══════ 2. THE PIVOT ═══════
-\begin{frame}{转折点：从``怎么比''到``怎么让它更好''}
-\begin{columns}[T]
-\column{0.48\textwidth}
-\begin{block}{AI提出的方向}
-\footnotesize
-``既然MOHAWK证明了Transformer能蒸馏到SSM，\\
-要不要试试把ViT教师的知识蒸馏到你的Mamba学生？''
+  \begin{frame}{转折点：从「怎么比」到「怎么让它更好」}
+  \begin{columns}[T]
+  \column{0.48\textwidth}
+  \begin{block}{AI提出的方向}
+  \footnotesize
+  既然MOHAWK证明了Transformer能蒸馏到SSM，\\
+  要不要把ViT教师的知识蒸馏到你的Mamba学生？
 \end{block}
 \vspace{0.3cm}
 \begin{block}{为什么接受这个建议}
@@ -91,8 +91,8 @@ Mamba：O(n)，理论更快，但在避障任务上\\
 \vspace{0.3cm}
 \begin{alertblock}{研究范式的转变}
 \footnotesize
-从``自动化管线生成模型''转向\\
-``AI建议方向 + 人类决策 + 系统实验验证''
+从「自动化管线生成模型」转向\\
+「AI建议方向 + 人类决策 + 系统实验验证」
 \end{alertblock}
 \end{columns}
 \end{frame}
@@ -142,42 +142,38 @@ G\_lstm (CNN+LSTM, 0.80M)
 % ═══════ 4. FIRST SURPRISE ═══════
 \begin{frame}{第一个意外：推理速度的反直觉结果}
 \begin{columns}[T]
-\column{0.52\textwidth}
+\column{0.5\textwidth}
 \begin{block}{预期 vs 现实}
 \begin{itemize}
 \item \textbf{初始假设}：参数量小 = 推理快
-\item \textbf{实际结果}：\HL{A (0.97M)} 推理 \con{24.3ms}\\
-\ \ ——\ 参数量最小，反而是最慢的！
-\item \textbf{根因}：SS2D编码器的四方向选择性扫描\\
-每次扫描独立执行，四次累积
+\item \textbf{实际结果}：\HL{A (0.97M)} 推理 \con{24.3ms}
+\item \textbf{根因}：SS2D编码器四方向扫描，每次独立执行
 \end{itemize}
 \end{block}
 
 \begin{block}{关键认知修正}
 \footnotesize
 \textbf{参数量 $\neq$ 推理速度}\\
-编码器的架构设计对延迟的影响\\
-远大于时序头类型或参数量
+编码器架构对延迟的影响远大于时序头
 \end{block}
 
-\column{0.48\textwidth}
+\column{0.5\textwidth}
 \begin{table}
 \centering\footnotesize
 \begin{tabular}{lcc}
 \toprule
 模型 & 参数量 & 推理延迟 \\
 \midrule
-G\_basic & 0.49M & \HL{0.74ms} \\
+\HL{G\_basic} & 0.49M & \HL{0.74ms} \\
 G\_lstm & 0.80M & 1.00ms \\
 \HL{E} & 2.19M & 7.1ms \\
-C & 2.41M & 8.5ms \\
 教师 & 3.56M & 9.0ms \\
 B+ & 2.55M & 9.8ms \\
-D & 2.60M & 11.5ms \\
 \con{A} & \con{0.97M} & \con{24.3ms} \\
 \bottomrule
 \end{tabular}
 \end{table}
+\footnotesize\centering G\_basic快9.6倍，但碰撞多1.8次
 \end{columns}
 \end{frame}
 
@@ -199,25 +195,19 @@ C & 3 & 3 \\
 A & 3 & 3 \\
 \bottomrule
 \end{tabular}
+\vspace{0.1cm}
+B+和E蒸馏后降到1次碰撞，\pos{超越教师的2次}
 \end{block}
-\vspace{0.2cm}
+
+\column{0.52\textwidth}
+\begin{alertblock}{为什么A和C蒸馏无效？—— E-SSM对照}
 \footnotesize
-B+和E在BC下只有3次碰撞，\\
-\pos{蒸馏后降到1次，甚至超越教师的2次！}
-\end{block}
-
-\column{0.48\textwidth}
-\begin{alertblock}{但为什么A和C蒸馏无效？}
-\begin{itemize}\footnotesize
-\item A (SS2D编码器)：扫描展平2D $\to$ 1D
-\item C (CNN编码器)：卷积保留2D空间结构
-\item \textbf{设计对照实验}：E vs E-SSM\\
-将E的CNN编码器换成SSM，其余不变
+\begin{itemize}
+\item A (SS2D)：扫描展平2D$\to$1D。C (CNN)：卷积保留2D结构
+\item \textbf{设计E-SSM}：将E的CNN编码器换成SSM，其余不变
 \end{itemize}
-\end{alertblock}
-
-\begin{block}{E-SSM对照结果}
-\centering\footnotesize
+\vspace{0.2cm}
+\centering
 \begin{tabular}{lcc}
 \toprule
 & $\mathcal{L}_\text{feat}$ & $\mathcal{L}_\text{GT}$ \\
@@ -228,7 +218,7 @@ E (CNN) & 0.85 & 0.02 \\
 \end{tabular}
 \vspace{0.1cm}
 \textbf{\con{蒸馏完全失败}}
-\end{block}
+\end{alertblock}
 \end{columns}
 \end{frame}
 
@@ -258,7 +248,7 @@ E (CNN) & 0.85 & 0.02 \\
 
 \begin{alertblock}{这个发现的特殊性}
 \footnotesize
-我们没有满足于``蒸馏对某些模型有效''，\\
+我们没有满足于「蒸馏对某些模型有效」，\\
 而是追问了\textbf{为什么}——设计了E-SSM对照实验，\\
 找到了因果机制。这才是科学发现。
 \end{alertblock}
@@ -289,25 +279,22 @@ E (CNN) & 0.85 & 0.02 \\
 \pos{超越了教师自身的适应范围。}
 \end{block}
 
-\column{0.48\textwidth}
-\begin{block}{控制质量也是最优}
+\column{0.5\textwidth}
+\begin{block}{控制质量与效率权衡}
 \centering\footnotesize
 \begin{tabular}{lccc}
 \toprule
 & MAE & Jerk & MAE\_y \\
 \midrule
 \HL{E} & \HL{0.220} & \HL{0.023} & \HL{0.060} \\
-B+ & 0.286 & 0.056 & 0.111 \\
 教师 & 0.346 & 0.040 & 0.307 \\
 \bottomrule
 \end{tabular}
-\end{block}
-\vspace{0.2cm}
-\begin{block}{G\_basic的启示}
-\footnotesize
-CNN+MLP (0.49M, 0.74ms)\\
-仅比E多1.8次碰撞，参数少78\%，快9.6倍\\
-$\to$ \textbf{SSM时序头在T=1下边际贡献有限}
+\vspace{0.15cm}
+\textbf{但SSM时序头贡献有多大？}\\
+G\_basic (CNN+MLP, 0.49M, 0.74ms)\\
+仅比E多1.8碰撞，参数少78\%，快9.6倍\\
+$\to$ SSM时序头在T=1下边际贡献有限
 \end{block}
 \end{columns}
 \end{frame}
@@ -437,7 +424,7 @@ E蒸馏：2.19M·7.1ms·1碰撞·速度鲁棒\\
 \begin{frame}{总结：从问题到答案的路程}
 \begin{enumerate}
 \item \textbf{起点}：Mamba能替代Transformer吗？——自动化探索效果不好
-\item \textbf{转折}：AI建议蒸馏，转向``怎么让Mamba更好''
+\item \textbf{转折}：AI建议蒸馏，转向「怎么让Mamba更好」
 \item \textbf{核心发现}：\HL{跨架构蒸馏有效，但编码器必须保留空间结构}\\
 \footnotesize ——通过E-SSM对照实验确立了因果机制
 \item \textbf{意外收获}：\HL{蒸馏使学生超越教师}\\
