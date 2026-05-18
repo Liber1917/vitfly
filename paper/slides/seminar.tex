@@ -1,483 +1,467 @@
-\documentclass[14pt,aspectratio=169,xcolor=dvipsnames]{beamer}
+\documentclass[aspectratio=169,10pt]{beamer}
+\usetheme{Madrid}
+\usecolortheme{default}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
 \usepackage{fontspec}
 \usepackage{xeCJK}
 \setCJKmainfont{SimSun}
 \setCJKsansfont{SimHei}
-\usepackage{amsmath,amssymb,booktabs}
-\usepackage{tikz}
-\usetikzlibrary{shapes,arrows,positioning,fit,backgrounds}
+\usepackage{amsmath,amssymb,amsthm,booktabs,mathtools}
+\usepackage{graphicx,tikz}
+\usetikzlibrary{arrows.meta,positioning,decorations.pathreplacing,shapes,fit}
 
-\mode<presentation>{
-  \usetheme{Madrid}
-  \usecolortheme{whale}
-  \setbeamercolor{title}{fg=white,bg=blue!70!black}
-  \setbeamercolor{frametitle}{fg=white,bg=blue!60!black}
-  \setbeamercolor{block title}{fg=white,bg=blue!50!black}
-  \setbeamertemplate{navigation symbols}{}
-  \setbeamertemplate{footline}[frame number]
-}
+\definecolor{positive}{HTML}{0173B2}
+\definecolor{negative}{HTML}{DE8F05}
+\definecolor{emphasis}{HTML}{029E73}
+\definecolor{neutral}{gray}{0.55}
+\newcommand{\pos}[1]{\textcolor{positive}{#1}}
+\newcommand{\con}[1]{\textcolor{negative}{#1}}
+\newcommand{\HL}[1]{\textcolor{emphasis}{#1}}
 
-\title[基于Mamba的四旋翼视觉避障]{基于神经网络的四旋翼飞行器端到端视觉避障}
-\subtitle{——Mamba架构与跨架构知识蒸馏的系统性研究}
-\author[邢锦文]{邢锦文\\指导教师：XXX教授}
-\institute[东北大学]{信息科学与工程学院 \quad 自动化专业\\东北大学}
-\date{\today}
+\title[四旋翼视觉避障]{基于神经网络的四旋翼飞行器\\端到端视觉避障}
+\subtitle{Mamba架构与跨架构知识蒸馏的系统性研究}
+\author[邢锦文]{邢锦文 \quad 指导教师：XXX教授}
+\institute[东北大学]{信息科学与工程学院·自动化\\东北大学}
+\date{}
 
 \begin{document}
 
-% ═══════ SLIDE 1: 标题页 ═══════
 \begin{frame}
-  \titlepage
+\titlepage
 \end{frame}
 
-% ═══════ SLIDE 2: 问题意识 ═══════
-\begin{frame}{问题意识}
-  \begin{columns}
-    \column{0.55\textwidth}
-    \begin{block}{现实驱动}
-      \begin{itemize}
-        \item 灾害救援：无人机 5-7m/s 飞越废墟搜索受困人员
-        \item 物流配送：城市末端"最后一公里"
-        \item 基础设施巡检：高压线、风机叶片、桥梁
-      \end{itemize}
-    \end{block}
-    \begin{block}{核心矛盾}
-      高速飞行（5-7m/s）要求 \textbf{毫秒级决策} \\
-      但现有方法要么 \textbf{太快看不准}，要么 \textbf{太准跑不快}
-    \end{block}
+% ─── SLIDE 2: WHY ───
+\begin{frame}{高速避障为什么仍然很难？}
+\begin{columns}[T]
+\column{0.45\textwidth}
+\begin{block}{现实需求}
+\begin{itemize}
+\item 灾害救援：5--7m/s 穿越废墟
+\item 物流配送：城市末端配送
+\item 设施巡检：高压线·风机·桥梁
+\end{itemize}
+\end{block}
+\begin{block}{核心矛盾}
+高速飞行 $\to$ 毫秒级决策\\
+现有方法：\con{太快看不准}，\con{太准跑不快}
+\end{block}
 
-    \column{0.45\textwidth}
-    \begin{block}{研究空白}
-      \begin{itemize}
-        \item Mamba（线性复杂度SSM）在机器人避障中的适用性\\
-          \textbf{——无人系统研究过}
-        \item 跨架构蒸馏从ViT到Mamba的有效边界\\
-          \textbf{——无人系统界定过}
-        \item 三种架构范式（SS2D/CNN/混合）的全组合对比\\
-          \textbf{——无人系统做过}
-      \end{itemize}
-    \end{block}
-  \end{columns}
+\column{0.55\textwidth}
+\begin{alertblock}{研究空白}
+\begin{enumerate}
+\item Mamba (O(n) SSM) 在机器人避障中的适用性 — \HL{无人系统研究}
+\item 跨架构蒸馏从ViT到Mamba的有效边界 — \HL{无人界定}
+\item SS2D/CNN/混合 三种编码器全组合对比 — \HL{从未有过}
+\end{enumerate}
+\end{alertblock}
+\end{columns}
 \end{frame}
 
-% ═══════ SLIDE 3: 研究背景 ═══════
-\begin{frame}{研究背景：端到端避障的演进}
-  \begin{columns}
-    \column{0.5\textwidth}
-    \begin{block}{模块化方法（传统）}
-      \begin{center}
-        \begin{tikzpicture}[node distance=0.6cm, auto]
-          \node[draw,rounded corners,fill=gray!20] (S) {感知};
-          \node[draw,rounded corners,fill=gray!20,right=of S] (M) {建图};
-          \node[draw,rounded corners,fill=gray!20,right=of M] (P) {规划};
-          \node[draw,rounded corners,fill=gray!20,right=of P] (C) {控制};
-          \draw[->] (S) -- (M); \draw[->] (M) -- (P); \draw[->] (P) -- (C);
-        \end{tikzpicture}
-      \end{center}
-      \begin{itemize}
-        \item 逐级误差累积——感知偏差 $\to$ 灾难碰撞
-        \item 总延迟 50-200ms $\to$ 已飞 0.25-1m
-        \item 信息瓶颈——接口定义丢失原始信息
-      \end{itemize}
-    \end{block}
+% ─── SLIDE 3: PROBLEM ───
+\begin{frame}{端到端避障：从CNN到Transformer}
+\begin{columns}[T]
+\column{0.48\textwidth}
+\begin{block}{模块化方法（传统）}
+\centering
+\begin{tikzpicture}[node distance=0.4cm,font=\footnotesize]
+\node[draw,rounded corners,fill=black!10] (S) {感知};
+\node[draw,rounded corners,fill=black!10,right=of S] (M) {建图};
+\node[draw,rounded corners,fill=black!10,right=of M] (P) {规划};
+\node[draw,rounded corners,fill=black!10,right=of P] (C) {控制};
+\draw[->] (S)--(M); \draw[->] (M)--(P); \draw[->] (P)--(C);
+\end{tikzpicture}
+\footnotesize 误差累积 $\to$ 灾难碰撞\\
+延迟 50--200ms $\to$ 已飞 0.25--1m
+\end{block}
 
-    \column{0.5\textwidth}
-    \begin{block}{端到端方法（ViT-Fly，2024）}
-      \begin{center}
-        \begin{tikzpicture}[node distance=0.8cm]
-          \node[draw,rounded corners,fill=blue!20] (D) {深度图 60$\times$90};
-          \node[draw,rounded corners,fill=blue!30,below=of D] (V) {ViT编码器};
-          \node[draw,rounded corners,fill=blue!40,below=of V] (L) {LSTM时序头};
-          \node[draw,rounded corners,fill=blue!50,below=of L,text=white] (O) {速度指令};
-          \draw[->] (D) -- (V); \draw[->] (V) -- (L); \draw[->] (L) -- (O);
-        \end{tikzpicture}
-      \end{center}
-      \begin{itemize}
-        \item 全局注意力——捕获长程空间依赖
-        \item 7m/s 超越 CNN 基线
-        \item \textbf{代价：ViT 自注意力 O(n$^2$)，推理延迟高}
-      \end{itemize}
-    \end{block}
-  \end{columns}
+\column{0.48\textwidth}
+\begin{block}{端到端：ViT-Fly (2024)}
+\centering
+\begin{tikzpicture}[node distance=0.5cm,font=\footnotesize]
+\node[draw,rounded corners,fill=positive!20] (D) {深度图 60$\times$90};
+\node[draw,rounded corners,fill=positive!35,below=of D] (V) {ViT 编码器 + LSTM};
+\node[draw,rounded corners,fill=positive!50,below=of V,text=white] (O) {速度指令};
+\draw[->] (D)--(V); \draw[->] (V)--(O);
+\end{tikzpicture}
+\footnotesize 全局注意力 $\to$ 7m/s超越CNN\\
+\con{代价：O(n$^2$)自注意力，推理延迟高}
+\end{block}
+\end{columns}
+\vspace{0.3cm}
+\begin{center}
+\textbf{核心问题：能否找到 \pos{线性复杂度 + 全局感知} 的统一方案？}
+\end{center}
 \end{frame}
 
-% ═══════ SLIDE 4: 核心挑战 ═══════
-\begin{frame}{核心挑战：速度与精度的根本矛盾}
-  \begin{center}
-    \begin{tabular}{lccc}
-      \toprule
-      \textbf{架构} & \textbf{计算复杂度} & \textbf{视觉感知} & \textbf{推理延迟} \\
-      \midrule
-      CNN (DroNet) & $\mathcal{O}(n)$ & 局部感受野 & 低 \\
-      ViT (ViT-Fly) & $\mathcal{O}(n^2)$ & 全局注意力 & 高 \\
-      \textbf{Mamba (SSM)} & \textbf{$\mathcal{O}(n)$} & \textbf{选择性全局} & \textbf{?} \\
-      \bottomrule
-    \end{tabular}
-  \end{center}
+% ─── SLIDE 4: MAMBA ───
+\begin{frame}{方案：状态空间模型 (Mamba)}
+\begin{columns}[T]
+\column{0.55\textwidth}
+\begin{itemize}
+\item \textbf{选择性SSM}：输入驱动的动态状态转移
+\item 复杂度：\pos{O(n)} vs 注意力 O(n$^2$)
+\item 硬件感知并行扫描 — GPU高效
+\item 选择性 = 动态信息流 = 保留关键，遗忘冗余
+\end{itemize}
 
-  \begin{block}{Mamba 的吸引力}
-    \begin{itemize}
-      \item 状态空间模型：线性复杂度，无 KV 缓存，硬件感知并行扫描
-      \item 选择性机制：根据输入动态调节信息流（保留关键，遗忘冗余）
-      \item 但：\textbf{哪种 Mamba 设计最适合避障？蒸馏能提升多少？}
-    \end{itemize}
-  \end{block}
+\begin{block}{关键机制}
+\[
+ h_t = \mathbf{\bar{A}}h_{t-1} + \mathbf{\bar{B}}x_t,\quad
+ y_t = \mathbf{C}h_t
+ \]
+ \[
+ \mathbf{B},\mathbf{C},\Delta = f_\text{selective}(x_t)
+ \]
+\end{block}
 
-  \begin{alertblock}{三个核心问题}
-    (1) 架构适配性 \quad (2) 知识迁移可行性 \quad (3) 蒸馏边界条件
-  \end{alertblock}
+\column{0.45\textwidth}
+\begin{block}{三个核心研究问题}
+\begin{enumerate}
+\item \textbf{架构适用性}\\
+哪种Mamba设计避障最优？
+\item \textbf{知识迁移可行性}\\
+ViT教师 $\to$ Mamba学生有效吗？
+\item \textbf{蒸馏边界条件}\\
+什么时候蒸馏成功/失败？
+\end{enumerate}
+\end{block}
+\end{columns}
 \end{frame}
 
-% ═══════ SLIDE 5: 研究方法论 ★ ═══════
-\begin{frame}{研究方法论：双Agent人机协作新范式}
-  \begin{columns}
-    \column{0.5\textwidth}
-    \begin{block}{为什么用这种范式}
-      \begin{itemize}
-        \item 训练与仿真运行环境不同\\
-              (GPU云服务器 vs WSL2本地)
-        \item 大规模实验的并行管理需求\\
-              (60+轮训练, 100+次仿真)
-        \item 人机分工：\\
-              人——架构决策、实验设计\\
-              AI——代码实现、论文写作
-      \end{itemize}
-    \end{block}
+% ─── SLIDE 5: METHOD ───
+\begin{frame}{方法：跨架构知识蒸馏}
+\centering
+\begin{tikzpicture}[node distance=0.4cm,font=\footnotesize]
+\node[draw,rounded corners,fill=black!10,minimum width=7cm,minimum height=0.8cm] (T)
+{\textbf{教师：ViT + LSTM (3.56M)}};
 
-    \column{0.5\textwidth}
-    \begin{block}{双Agent流水线}
-      \begin{center}
-        \begin{tikzpicture}[node distance=0.5cm]
-          \node[draw,rounded corners,fill=green!20,text width=3.5cm,align=center] (T)
-            {训练Agent (AutoDL)\\[2pt] \footnotesize{RTX 5090, 模型设计\\BC/蒸馏训练, 超参搜索}};
-          \node[draw,rounded corners,fill=orange!20,text width=3.5cm,align=center,below=of T] (S)
-            {仿真Agent (WSL2本地)\\[2pt] \footnotesize{ROS Noetic + Flightmare\\60m赛道, 碰撞统计}};
-          \draw[->,thick] (T.east) to[out=0,in=0] node[right] {\footnotesize{GitHub}} (S.east);
-          \draw[->,thick] (S.west) to[out=180,in=180] node[left] {\footnotesize{结果}} (T.west);
-        \end{tikzpicture}
-      \end{center}
-      \textbf{训练$\to$提交$\to$拉取$\to$仿真$\to$回传} 闭环
-    \end{block}
-  \end{columns}
+\node[draw,rounded corners,fill=positive!15,below=of T,xshift=-2.2cm,minimum width=1.8cm,minimum height=0.6cm] (L1)
+{$L_\text{feat}$\\\tiny 特征对齐};
+\node[draw,rounded corners,fill=positive!25,below=of T,minimum width=1.8cm,minimum height=0.6cm] (L2)
+{$L_\text{distill}$\\\tiny 输出蒸馏};
+\node[draw,rounded corners,fill=positive!35,below=of T,xshift=2.2cm,minimum width=1.8cm,minimum height=0.6cm] (L3)
+{$L_\text{GT}$\\\tiny 真值监督};
 
-  \begin{alertblock}{范式意义}
-    AI辅助研究不是替代人类判断，而是\underline{将重复性工作交给AI，人类专注于创造性决策}。
-    本研究的全部架构设计、实验方案、结果分析均由人类主导；AI辅助代码实现与文本撰写。
-  \end{alertblock}
+\node[draw,rounded corners,fill=emphasis!10,below=of L2,minimum width=7.5cm,minimum height=1cm] (S)
+{\textbf{Mamba学生 (6种变体)}\\
+A:VMamba+LSTM \ B/B+:MambaVision \ C:CNN+Mamba3 \ D:STH-Mamba \ E:DecisionMamba};
+
+\draw[->,thick] (T) -- (L1); \draw[->,thick] (T) -- (L2); \draw[->,thick] (T) -- (L3);
+\draw[->,thick] (L1) -- (S); \draw[->,thick] (L2) -- (S); \draw[->,thick] (L3) -- (S);
+\end{tikzpicture}
+
+\begin{block}{损失函数}
+\centering\footnotesize
+$\mathcal{L} = \alpha\|f_S-f_T\|^2 + \beta\|\hat{y}_S-\hat{y}_T\|^2 + \gamma\|\hat{y}_S-y_{\text{GT}}\|^2$
+\qquad ($\alpha=\beta=\gamma=1$ 消融验证最优)
+\end{block}
 \end{frame}
 
-% ═══════ SLIDE 6: 技术路线 ═══════
-\begin{frame}{技术路线：Mamba + 跨架构知识蒸馏}
-  \begin{center}
-    \begin{tikzpicture}[node distance=0.6cm]
-      % Teacher
-      \node[draw,rounded corners,fill=gray!20,minimum width=6cm,minimum height=1cm] (T)
-        {\textbf{教师: ViT+LSTM (3.56M params)}};
-
-      % Three losses
-      \node[draw,rounded corners,fill=blue!15,below=of T,xshift=-2cm,minimum width=2cm] (L1)
-        {$L_\text{feat}$\\\footnotesize{特征对齐}};
-      \node[draw,rounded corners,fill=blue!25,below=of T,minimum width=2cm] (L2)
-        {$L_\text{distill}$\\\footnotesize{输出蒸馏}};
-      \node[draw,rounded corners,fill=blue!35,below=of T,xshift=2cm,minimum width=2cm] (L3)
-        {$L_\text{GT}$\\\footnotesize{真值监督}};
-
-      % Student
-      \node[draw,rounded corners,fill=green!20,below=of L2,xshift=0cm,minimum width=7cm,minimum height=1.2cm] (S)
-        {\textbf{Mamba学生} \quad A: VMamba+LSTM \quad B/B+: MambaVision \quad C: CNN+Mamba3 \quad D: STH-Mamba \quad E: DecisionMamba};
-
-      \draw[->,thick] (T) -- (L1); \draw[->,thick] (T) -- (L2); \draw[->,thick] (T) -- (L3);
-      \draw[->,thick] (L1) -- (S); \draw[->,thick] (L2) -- (S); \draw[->,thick] (L3) -- (S);
-    \end{tikzpicture}
-  \end{center}
-
-  \begin{block}{损失函数}
-    \[
-    \mathcal{L} = \alpha\underbrace{\|f_\text{student} - f_\text{teacher}\|^2}_{\text{特征对齐}}
-                  + \beta\underbrace{\|\hat{y}_\text{student} - \hat{y}_\text{teacher}\|^2}_{\text{输出蒸馏}}
-                  + \gamma\underbrace{\|\hat{y}_\text{student} - y_\text{GT}\|^2}_{\text{真值监督}}
-    \]
-    ($\alpha=\beta=\gamma=1$ 时最优)
-  \end{block}
+% ─── SLIDE 6: ARCHITECTURES ───
+\begin{frame}{6种Mamba变体 + 对照基线}
+\begin{table}
+\centering\footnotesize
+\begin{tabular}{lllcc}
+\toprule
+分支 & 编码器 & 时序头 & 参数量 & 蒸馏碰撞 \\
+\midrule
+A   & SS2D扫描       & LSTM    & 0.97M & 3 \\
+B   & MambaVision    & SSM     & 2.61M & 2 \\
+\HL{B+} & MambaVision & Mamba-3 & 2.55M & \HL{1} \\
+C   & CNN            & Mamba-3 & 2.41M & 3 \\
+D   & CNN类          & Mamba-2 & 2.60M & 2 \\
+\HL{E}  & 轻量CNN (455K) & SSM   & 2.19M & \HL{1} \\
+\midrule
+教师 & ViT & LSTM & 3.56M & 2 \\
+\bottomrule
+\end{tabular}
+\end{table}
+\begin{columns}[T]
+\column{0.48\textwidth}
+\footnotesize 对照: G\_basic (CNN+MLP, 0.49M)\\G\_lstm (CNN+LSTM, 0.80M)
+\column{0.48\textwidth}
+\footnotesize 覆盖: 3编码器范式 $\times$ 4时序头\\
+全组合对比 + 对照基线
+\end{columns}
 \end{frame}
 
-% ═══════ SLIDE 7: 架构总览 ═══════
-\begin{frame}{六种Mamba变体架构}
-  \begin{table}
-    \centering
-    \begin{tabular}{lllcc}
-      \toprule
-      \textbf{分支} & \textbf{编码器} & \textbf{时序头} & \textbf{参数量} & \textbf{蒸馏后碰撞} \\
-      \midrule
-      A & SS2D扫描 & LSTM & 0.97M & 3 \\
-      B & MambaVision混合 & SSM & 2.61M & 2 \\
-      B+ & MambaVision混合 & Mamba-3 & 2.55M & \textbf{1} \\
-      C & CNN (MobileNetV3) & Mamba-3 & 2.41M & 3 \\
-      D & CNN类 & Mamba-2 & 2.60M & 2 \\
-      E & 轻量CNN (455K) & SSM & 2.19M & \textbf{1} \\
-      \midrule
-      教师 & ViT (MixTransformer) & LSTM & 3.56M & 2 \\
-      \bottomrule
-    \end{tabular}
-  \end{table}
+% ─── SLIDE 7: CORE DISCOVERY ───
+\begin{frame}{核心发现：空间结构 = 蒸馏边界条件}
+\begin{columns}[T]
+\column{0.48\textwidth}
+\begin{block}{E-SSM 对照实验}
+\begin{itemize}
+\item \pos{CNN编码器(E)}：\\
+$\mathcal{L}_\text{feat}=0.85$，\textbf{蒸馏成功}
+\item \con{SSM编码器(E-SSM)}：\\
+$\mathcal{L}_\text{feat}=10.58$\\
+$\mathcal{L}_\text{GT}$: 0.02 $\to$ 0.83，\textbf{完全失败}
+\end{itemize}
+\end{block}
 
-  \begin{block}{设计覆盖}
-    编码器：SS2D / MambaVision混合 / CNN \quad 三种范式全组合 \\
-    时序头：LSTM / SSM / Mamba-2 / Mamba-3 \quad 四种实现 \\
-    对照基线：G\_basic (CNN+MLP, 0.49M)、G\_lstm (CNN+LSTM, 0.80M)
-  \end{block}
+\column{0.48\textwidth}
+\begin{alertblock}{根因分析}
+\centering
+\begin{tikzpicture}[node distance=0.3cm,font=\tiny]
+\node[draw,rounded corners,fill=positive!15,text width=2.5cm,align=center] (C) {CNN\\保留2D空间结构};
+\node[draw,rounded corners,fill=negative!15,text width=2.5cm,align=center,below=of C] (S) {SSM\\扫描展平为1D序列};
+\node[right=0.1cm of C,text width=2cm,align=left] (R1) {$\to$ MSE对齐有效};
+\node[right=0.1cm of S,text width=2cm,align=left] (R2) {$\to$ 逐点对应被破坏};
+\draw[->] (C)--(R1); \draw[->] (S)--(R2);
+\end{tikzpicture}
+\end{alertblock}
+\end{columns}
+\vspace{0.2cm}
+\begin{block}{\HL{设计原则}}
+\textbf{跨架构蒸馏的必要前提：学生编码器必须保留空间结构。}
+\end{block}
 \end{frame}
 
-% ═══════ SLIDE 8: 核心发现 ═══════
-\begin{frame}{核心发现：编码器必须保留空间结构}
-  \begin{columns}
-    \column{0.5\textwidth}
-    \begin{block}{E-SSM对照实验}
-      \begin{itemize}
-        \item E (CNN编码器)：$\mathcal{L}_\text{feat}=0.85$，蒸馏成功
-        \item E-SSM (替换为SSM编码器，相同输出维度)：\\
-              $\mathcal{L}_\text{feat}=10.58$\\
-              $\mathcal{L}_\text{GT}$：0.02 $\to$ 0.83\\
-              \textbf{蒸馏完全失败}
-      \end{itemize}
-    \end{block}
+% ─── SLIDE 8: RESULTS ───
+\begin{frame}{主实验结果：DecisionMamba最优}
+\begin{columns}[T]
+\column{0.52\textwidth}
+\begin{table}
+\centering\footnotesize
+\begin{tabular}{lccc}
+\toprule
+模型 & 参数量 & 延迟 & 碰撞 \\
+\midrule
+教师 & 3.56M & 9.0ms & 2 \\
+\HL{E 蒸馏} & 2.19M & \HL{7.1ms} & \HL{1} \\
+\HL{B+ 蒸馏} & 2.55M & 9.8ms & \HL{1} \\
+B 蒸馏 & 2.61M & 10.2ms & 2 \\
+D BC & 2.60M & 11.5ms & 2 \\
+A BC & 0.97M & 24.3ms & 3 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-    \column{0.5\textwidth}
-    \begin{alertblock}{为什么失败}
-      \begin{center}
-        \begin{tikzpicture}
-          \node[draw,rounded corners,fill=green!15,minimum width=2.2cm] (CNN) {CNN编码器\\[2pt]\footnotesize{保留2D空间结构}};
-          \node[draw,rounded corners,fill=red!15,minimum width=2.2cm,right=of CNN] (SSM) {SSM编码器\\[2pt]\footnotesize{扫描展平为1D序列}};
-          \node[draw,rounded corners,fill=gray!10,below=of CNN,minimum width=2.2cm] (R1) {MSE对齐有效\\[2pt]\footnotesize{特征空间兼容}};
-          \node[draw,rounded corners,fill=gray!10,below=of SSM,minimum width=2.2cm] (R2) {MSE对齐失败\\[2pt]\footnotesize{逐点对应被破坏}};
-          \draw[->] (CNN) -- (R1); \draw[->] (SSM) -- (R2);
-        \end{tikzpicture}
-      \end{center}
-    \end{alertblock}
-  \end{columns}
-
-  \begin{block}{一般性设计原则}
-    \textbf{跨架构蒸馏的必要前提：学生编码器必须保留空间结构。}
-    这一原则不仅适用于本研究的ViT$\to$Mamba场景，
-    对未来所有跨架构蒸馏的编码器选型都具有指导意义。
-  \end{block}
+\column{0.48\textwidth}
+\begin{itemize}
+\item \HL{E}: 延迟 $\downarrow$21\%, 碰撞 $\downarrow$50\%
+\item \HL{速度鲁棒}: 5/7m/s 均 1 碰撞\\
+(\pos{唯一零退化模型})
+\item \HL{控制最优}: MAE=0.220\\
+Jerk=0.023 (教师: 0.346, 0.040)
+\end{itemize}
+\end{columns}
 \end{frame}
 
-% ═══════ SLIDE 9: 结果 ═══════
-\begin{frame}{实验结果：DecisionMamba 整体最优}
-  \begin{columns}
-    \column{0.55\textwidth}
-    \begin{table}
-      \centering
-      \begin{tabular}{lccc}
-        \toprule
-        \textbf{模型} & \textbf{参数量} & \textbf{延迟} & \textbf{碰撞} \\
-        \midrule
-        教师 & 3.56M & 9.0ms & 2 \\
-        \textbf{E 蒸馏} & \textbf{2.19M} & \textbf{7.1ms} & \textbf{1} \\
-        \textbf{B+ 蒸馏} & 2.55M & 9.8ms & \textbf{1} \\
-        B 蒸馏 & 2.61M & 10.2ms & 2 \\
-        D BC & 2.60M & 11.5ms & 2 \\
-        A BC & 0.97M & 24.3ms & 3 \\
-        \bottomrule
-      \end{tabular}
-    \end{table}
-
-    \column{0.45\textwidth}
-    \begin{itemize}
-      \item E：推理比教师快 21\%，碰撞减少 50\%
-      \item E 在 5m/s 和 7m/s 均保持 1 次碰撞\\
-            （唯一零退化模型）
-      \item B+ 在树木环境中表现最佳\\
-            （MambaVision 混合编码器泛化优势）
-    \end{itemize}
-  \end{columns}
-
-  \begin{alertblock}{关键洞察}
-    G\_basic（CNN+MLP, 0.49M, 0.74ms, 2.8$\pm$1.3 碰撞）—
-    参数量仅E的22\%，速度快9.6倍，碰撞多1.8次。\\
-    $\to$ \textbf{SSM时序头在单帧决策(T=1)下的独立贡献高度边际化}
-  \end{alertblock}
-\end{frame}
-
-% ═══════ SLIDE 10: 蒸馏效果 ═══════
+% ─── SLIDE 9: DISTILLATION ───
 \begin{frame}{蒸馏效果：学生超越教师}
-  \begin{columns}
-    \column{0.5\textwidth}
-    \begin{block}{碰撞次数变化}
-      \begin{tabular}{lcc}
-        \toprule
-        \textbf{模型} & \textbf{BC} & \textbf{蒸馏} \\
-        \midrule
-        B+ & 3 & \textbf{1}$\downarrow$ \\
-        E & 3 & \textbf{1}$\downarrow$ \\
-        B & DNF & 2 $\uparrow$ \\
-        D & 2 & 2 $-$ \\
-        C & 3 & 3 $-$ \\
-        A & 3 & 3 $-$ \\
-        \bottomrule
-      \end{tabular}
-    \end{block}
+\begin{columns}[T]
+\column{0.48\textwidth}
+\begin{block}{碰撞次数变化}
+\centering\footnotesize
+\begin{tabular}{lcc}
+\toprule
+模型 & BC & 蒸馏 \\
+\midrule
+\HL{B+} & 3 & \HL{1} \\
+\HL{E} & 3 & \HL{1} \\
+B & DNF & 2 \\
+D & 2 & 2 \\
+C & 3 & 3 \\
+A & 3 & 3 \\
+\bottomrule
+\end{tabular}
+\end{block}
 
-    \column{0.5\textwidth}
-    \begin{block}{控制质量 (5m/s)}
-      \begin{tabular}{lccc}
-        \toprule
-        & \textbf{MAE} & \textbf{Jerk} & \textbf{MAE\_y} \\
-        \midrule
-        E蒸馏 & \textbf{0.220} & \textbf{0.023} & \textbf{0.060} \\
-        B+蒸馏 & 0.286 & 0.056 & 0.111 \\
-        教师 & 0.346 & 0.040 & 0.307 \\
-        G基本 & 1.255 & 0.560 & 2.041 \\
-        \bottomrule
-      \end{tabular}
-    \end{block}
-  \end{columns}
-
-  \begin{block}{速度鲁棒性}
-    蒸馏模型在 7m/s 保持 1 次碰撞（零退化），教师退化至 5 次（+150\%）\\
-    \textbf{蒸馏不仅降低了碰撞，还增强了速度鲁棒性——超越了教师自身的适应范围。}
-  \end{block}
+\column{0.48\textwidth}
+\begin{block}{速度鲁棒性 (7m/s)}
+\centering\footnotesize
+\begin{tabular}{lcc}
+\toprule
+模型 & 5m/s & 7m/s \\
+\midrule
+\HL{E蒸馏} & 1 & \HL{1} \\
+\HL{B+蒸馏} & 1 & \HL{1} \\
+教师 & 2 & \con{5} \\
+\bottomrule
+\end{tabular}
+\end{block}
+\end{columns}
+\vspace{0.2cm}
+\begin{center}
+\textbf{蒸馏不仅降低了碰撞，还增强了速度鲁棒性 — \pos{超越教师自身的适应范围}}
+\end{center}
 \end{frame}
 
-% ═══════ SLIDE 11: 消融洞察 ═══════
-\begin{frame}{消融实验：什么因素最重要}
-  \begin{table}
-    \centering
-    \begin{tabular}{lcccl}
-      \toprule
-      \textbf{设计因素} & \textbf{最佳配置} & \textbf{碰撞范围} & \textbf{影响} \\
-      \midrule
-      编码器类型 & CNN/混合（保留空间结构） & 1--5 & ★★★★★ \\
-      知识蒸馏 & 三分量蒸馏 ($\alpha=\beta=\gamma=1$) & 1--DNF & ★★★★☆ \\
-      数据增强 & 仅对CNN编码器启用 & 1--5 & ★★★☆☆ \\
-      损失权重 & 默认均衡权重 & 1--4 & ★★☆☆☆ \\
-      多步预测 & T=1（单步） & 1--5 & ★★☆☆☆ \\
-      \bottomrule
-    \end{tabular}
-  \end{table}
-
-  \begin{block}{关键发现}
-    \begin{itemize}
-      \item \textbf{编码器类型} 的优先权超过所有其他因素之和
-      \item \textbf{单步预测(T=1)} 在避障中始终优于多步——当前帧的精确感知 $>$ 长程时序记忆
-      \item \textbf{数据增强} 的效果高度依赖架构类型：\\
-            CNN编码器有益（B+：3$\to$1），SSM编码器有害（D：2$\to$5）
-    \end{itemize}
-  \end{block}
+% ─── SLIDE 10: ABLATION ───
+\begin{frame}{消融洞察：设计因素排序}
+\begin{table}
+\centering\footnotesize
+\begin{tabular}{lccc}
+\toprule
+设计因素 & 最佳配置 & 碰撞范围 & 影响力 \\
+\midrule
+\HL{编码器类型} & CNN/混合 & 1--5 & \HL{★★★★★} \\
+知识蒸馏 & 三分量 & 1--DNF & ★★★★☆ \\
+数据增强 & CNN架构感知 & 1--5 & ★★★☆☆ \\
+损失权重 & 均衡 & 1--4 & ★★☆☆☆ \\
+多步预测 & T=1 & 1--5 & ★★☆☆☆ \\
+\bottomrule
+\end{tabular}
+\end{table}
+\begin{itemize}
+\item 编码器 $>$ 蒸馏 $>$ 增强 $>$ 权重 $>$ 时序长度
+\item T=1单步始终最优 — 当前帧精确感知 $>$ 长程记忆
+\item 数据增强：\pos{CNN有益(B+:3$\to$1)}，\con{SSM有害(D:2$\to$5)}
+\item G\_basic (CNN+MLP) 仅比E多1碰撞，但快9.6倍 — SSM时序头边际贡献
+\end{itemize}
 \end{frame}
 
-% ═══════ SLIDE 12: 人机协作经验 ═══════
-\begin{frame}{研究经验：人机协作的新范式}
-  \begin{columns}
-    \column{0.5\textwidth}
-    \begin{block}{人与AI的分工}
-      \begin{center}
-        \begin{tabular}{ll}
-          \toprule
-          \textbf{人类主导} & \textbf{AI辅助} \\
-          \midrule
-          研究问题定义 & 文献检索 \\
-          架构设计决策 & 代码实现 \\
-          实验方案设计 & 数据可视化 \\
-          结果分析判断 & 论文文本撰写 \\
-          创新点提炼 & 格式排版 \\
-          \bottomrule
-        \end{tabular}
-      \end{center}
-    \end{block}
+% ─── SLIDE 11: PARADIGM ───
+\begin{frame}{研究方法论：双Agent人机协作}
+\begin{columns}[T]
+\column{0.45\textwidth}
+\begin{block}{流水线架构}
+\centering
+\begin{tikzpicture}[node distance=0.3cm,font=\footnotesize]
+\node[draw,rounded corners,fill=positive!15,text width=3cm,align=center] (T)
+{\textbf{训练Agent}\\[2pt]\tiny AutoDL·RTX 5090\\模型设计·训练·调参};
+\node[draw,rounded corners,fill=emphasis!15,text width=3cm,align=center,below=of T] (S)
+{\textbf{仿真Agent}\\[2pt]\tiny WSL2·ROS·Flightmare\\60m赛道·碰撞统计};
+\draw[->,thick] (T.east) to[out=0,in=0] node[right]{\tiny GitHub} (S.east);
+\draw[->,thick] (S.west) to[out=180,in=180] node[left]{\tiny 结果} (T.west);
+\end{tikzpicture}
+\small 训练$\to$提交$\to$拉取$\to$仿真$\to$回传 闭环
+\end{block}
 
-    \column{0.5\textwidth}
-    \begin{block}{有效协作的关键}
-      \begin{enumerate}
-        \item \textbf{人类做决策，AI做执行}\\
-              架构设计、实验方案、关键发现的解释——这些必须由人做
-        \item \textbf{AI做\"低价值重复工作\"}\\
-              代码生成、图表绘制、文本润色、格式调整
-        \item \textbf{迭代式提示工程}\\
-              不是一次写完提示词，而是根据AI输出持续修正方向
-        \item \textbf{保持批判性思维}\\
-              AI的代码可能有bug，AI的分析可能遗漏关键细节
-      \end{enumerate}
-    \end{block}
-  \end{columns}
-
-  \begin{alertblock}{核心经验}
-    本研究的全部 60+ 轮训练、6 种架构设计、消融实验方案均由人类独立决策。
-    AI 辅助了代码实现（训练/评估脚本）、图表生成（12张图）和论文撰写，
-    但其输出均经过人类的严格审查与修正。
-  \end{alertblock}
+\column{0.55\textwidth}
+\begin{itemize}
+\item \textbf{人类主导}：问题定义·架构决策·实验设计·结果分析·创新提炼
+\item \textbf{AI辅助}：代码实现·图表绘制·文本撰写·文献检索
+\end{itemize}
+\begin{alertblock}{核心经验}
+60+轮训练·6种架构·消融方案由人类独立决策。\\
+AI辅助执行层，输出均经人类严格审查。
+\end{alertblock}
+\end{columns}
 \end{frame}
 
-% ═══════ SLIDE 13: 不足 ═══════
-\begin{frame}{研究不足与未来方向}
-  \begin{columns}
-    \column{0.55\textwidth}
-    \begin{block}{当前局限}
-      \begin{enumerate}
-        \item \textbf{仅仿真验证}\\
-              所有实验在 Flightmare 仿真器中完成，未在真实四旋翼上测试
-        \item \textbf{多种子统计不全}\\
-              仅对 G\_basic 完成了 4 种子统计，其余单次报告
-        \item \textbf{评估指标维度单一}\\
-              以碰撞为主要指标，缺少能耗、偏航稳定性等
-        \item \textbf{BC训练固有局限}\\
-              协变量偏移问题未根本解决（DAgger 成本过高）
-      \end{enumerate}
-    \end{block}
+% ─── SLIDE 12: LIMITATIONS ───
+\begin{frame}{局限与未来方向}
+\begin{columns}[T]
+\column{0.52\textwidth}
+\begin{block}{当前局限}
+\begin{enumerate}
+\item 仅仿真验证 — 无真实飞行测试
+\item 种子统计不全 — 仅 G\_basic 多种子
+\item 评估维度单一 — 碰撞为主，缺能耗/偏航
+\item BC固有限制 — 协变量偏移未根治
+\end{enumerate}
+\end{block}
 
-    \column{0.45\textwidth}
-    \begin{block}{未来工作}
-      \begin{enumerate}
-        \item \textbf{真实世界飞行验证}\\
-              Jetson Orin 部署 + TensorRT 优化
-        \item \textbf{多模态传感器融合}\\
-              深度+光流+IMU 联合输入
-        \item \textbf{与强化学习结合}\\
-              用蒸馏模型作为RL的初始策略
-        \item \textbf{编码器-时序头参数自动优化}\\
-              神经架构搜索(NAS)寻找帕累托最优
-      \end{enumerate}
-    \end{block}
-  \end{columns}
+\column{0.48\textwidth}
+\begin{block}{未来工作}
+\begin{enumerate}
+\item \pos{真实飞行} — Jetson Orin + TensorRT
+\item \pos{多模态融合} — 深度+光流+IMU
+\item \pos{强化学习} — 蒸馏策略作为RL初始化
+\item \pos{NAS自动寻优} — 编码器-时序头参数比
+\end{enumerate}
+\end{block}
+\end{columns}
 \end{frame}
 
-% ═══════ SLIDE 14: 总结 ═══════
+% ─── SLIDE 13: SUMMARY ───
 \begin{frame}{总结}
+\begin{enumerate}
+\item \HL{首次系统评估6种Mamba架构在四旋翼控制中的适用性}\\
+\footnotesize SS2D·MambaVision·CNN三种编码器 + 四种时序头全组合对比
 
-  \begin{block}{核心贡献}
-    \begin{enumerate}
-      \item \textbf{首次在四旋翼控制中系统评估六种Mamba架构}\\
-            ——覆盖SS2D、MambaVision混合、CNN三种编码器，四种时序头
-      \item \textbf{揭示跨架构蒸馏的核心边界条件}\\
-            ——编码器必须保留空间结构，否则MSE特征对齐完全失败
-      \item \textbf{发现DecisionMamba为最优配置}\\
-            ——2.19M参数 / 7.1ms / 1次碰撞 / 速度鲁棒
-      \item \textbf{验证蒸馏可使学生超越教师}\\
-            ——B+/E 从3次碰撞降至1次，同时增强速度鲁棒性
-      \item \textbf{确立设计因素优先级}\\
-            ——编码器 $>$ 蒸馏 $>$ 数据增强 $>$ 损失权重 $>$ 多步预测
-    \end{enumerate}
-  \end{block}
+\item \HL{揭示跨架构蒸馏的核心边界条件}\\
+\footnotesize 编码器保留空间结构 $\to$ 有效；SSM扫描展平 $\to$ 完全失败
 
-  \begin{center}
-    \textbf{轻量Mamba + 蒸馏 = 实时高速避障的可行路径}\\
-    \textbf{空间结构保留 = 跨架构蒸馏的第一原则}
-  \end{center}
+\item \HL{DecisionMamba(E) 整体最优：2.19M·7.1ms·1碰撞·速度鲁棒}
+
+\item \HL{蒸馏超越教师：B+/E 3$\to$1碰撞，教师高速退化150\%时蒸馏零退化}
+
+\item \HL{设计优先级：编码器 $>$ 蒸馏 $>$ 数据增强 $>$ 损失权重 $>$ 多步预测}
+\end{enumerate}
+\vspace{0.2cm}
+\begin{center}
+\large\textbf{轻量Mamba + 蒸馏 = 实时高速避障的可行路径}\\
+\textbf{空间结构保留 = 跨架构蒸馏的第一原则}
+\end{center}
 \end{frame}
 
-% ═══════ SLIDE 15: 致谢 ═══════
-\begin{frame}[plain]
-  \begin{center}
-    \Huge 谢谢！\\
-    \vspace{1cm}
-    \Large 欢迎提问
-    \vspace{1.5cm}
+% ─── REFERENCES ───
+\begin{frame}{参考文献}
+\footnotesize
+\begin{thebibliography}{9}
+\bibitem{gu2023mamba} Gu \& Dao. Mamba: Linear-time sequence modeling with selective state spaces. \textit{arXiv}, 2023.
+\bibitem{dao2024mamba2} Dao \& Gu. Transformers are SSMs. \textit{arXiv}, 2024.
+\bibitem{bhattacharya2024vitfly} Bhattacharya et al. ViTs for quadrotor obstacle avoidance. \textit{ICRA}, 2025.
+\bibitem{liu2024vmamba} Liu et al. VMamba: Visual state space model. \textit{arXiv}, 2024.
+\bibitem{hatamizadeh2024mambavision} Hatamizadeh \& Kautz. MambaVision. \textit{arXiv}, 2024.
+\bibitem{hinton2015distilling} Hinton et al. Distilling knowledge in a neural network. \textit{NeurIPS Workshop}, 2015.
+\bibitem{bick2024mohawk} Bick et al. MOHAWK: Transformers to SSMs. \textit{NeurIPS}, 2024.
+\bibitem{shah2017flightmare} Shah et al. Flightmare: A flexible quadrotor simulator. \textit{CoRL}, 2017.
+\bibitem{loquercio2018dronet} Loquercio et al. DroNet: Learning to fly by driving. \textit{IEEE RA-L}, 2018.
+\end{thebibliography}
+\end{frame}
 
-    \normalsize
-    代码与数据：\texttt{github.com/Liber1917/vitfly}\\
-    基于 Flightmare 仿真器 + PyTorch 实现
-  \end{center}
+% ─── CLOSING ───
+\begin{frame}[plain]
+\begin{center}
+\Huge 谢谢！\\[1cm]
+\Large 欢迎提问\\[1.5cm]
+\normalsize GitHub: \texttt{github.com/Liber1917/vitfly}
+\end{center}
+\end{frame}
+
+% ─── BACKUP SLIDES ───
+\appendix
+\begin{frame}{参数效率对比}
+\centering\footnotesize
+\begin{tabular}{lccc}
+\toprule
+模型 & 参数量 & 碰撞/M参数 \\
+\midrule
+G\_basic & 0.49M & 8.16 (最高) \\
+G\_lstm & 0.80M & 5.00 \\
+\HL{E 蒸馏} & 2.19M & \HL{0.46} \\
+B+ 蒸馏 & 2.55M & 0.39 \\
+教师 & 3.56M & 0.56 \\
+A BC & 0.97M & 3.09 (最差) \\
+\bottomrule
+\end{tabular}
+\vspace{0.3cm}
+G\_basic 效率最高但绝对碰撞更多 (4 vs 1) — SSM时序头在T=1下边际贡献
+\end{frame}
+
+\begin{frame}{环境泛化：树木环境}
+\centering\footnotesize
+\begin{tabular}{lcc}
+\toprule
+模型 & 5m/s & 7m/s \\
+\midrule
+教师 ViT+LSTM & \HL{0} & \HL{0} \\
+B+ 蒸馏 & \HL{0} & 1 \\
+E 蒸馏 & 1 & 2 \\
+\bottomrule
+\end{tabular}
+\vspace{0.3cm}
+教师零碰撞领跑 — \con{蒸馏泛化边界：学生容量限制}
+\end{frame}
+
+\begin{frame}{实验规模}
+\centering
+\begin{tabular}{lr}
+\toprule
+维度 & 数量 \\
+\midrule
+主要对照实验 & 6$\times$2$\times$2$\times$2 = 48组 \\
+消融实验 & 20+ 组 \\
+训练轮数 & 60+ 轮 \\
+仿真测试 & 100+ 次 \\
+参考文献 & 40 篇 \\
+\bottomrule
+\end{tabular}
 \end{frame}
 
 \end{document}
