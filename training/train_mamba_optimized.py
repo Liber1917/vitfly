@@ -241,7 +241,7 @@ def train_epoch(model, loader, optimizer, criterion, scaler, device, epoch,
         with autocast(device_type='cuda', dtype=torch.bfloat16):
             if seq_len > 1 and is_stateful:
                 # Stateful branches: pass 5D (B,S,C,H,W) — model loops frames internally
-                output, _ = model([depth, velocity, quat], None)
+                output, ssm_state = model([depth, velocity, quat], None)
                 target_f = target[:, -1, :]  # loss on last frame only
             elif seq_len > 1:
                 B, S = depth.shape[:2]
@@ -255,6 +255,11 @@ def train_epoch(model, loader, optimizer, criterion, scaler, device, epoch,
                 output, _ = model([depth, velocity, quat])
                 target_f = target
             loss = criterion(output, target_f)
+            
+            # State regularization: prevent SSM state drift during long sequences
+            if is_stateful and ssm_state is not None:
+                state_reg = ssm_state.norm(dim=1).mean() * 0.001
+                loss = loss + state_reg
             
             if torch.isnan(loss) or torch.isinf(loss):
                 print(f"  Warning: NaN/Inf loss at batch {batch_idx}, skipping")
