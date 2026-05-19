@@ -49,6 +49,8 @@ sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/branch_H_stateful_ss
 sys.path.insert(0, '/root/catkin_ws/src/vitfly-mambatest/experiments/mamba_branches/branch_H_stateful_ssm/models')
 sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/branch_F_lightweight_mamba3/models')
 sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/branch_G_cnn_baseline/models')
+sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/branch_A_stateful_lstm/models')
+sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/branch_D_stateful_mamba2/models')
 
 # Import models
 try:
@@ -199,6 +201,12 @@ def create_model(branch_name, config, device, args=None):
     elif branch_name == 'H':
         from stateful_ssm_model import create_stateful_ssm_model
         model = create_stateful_ssm_model(config)
+    elif branch_name == 'Ast':
+        from vmamba_stateful_lstm import create_vmamba_stateful_lstm
+        model = create_vmamba_stateful_lstm(config)
+    elif branch_name == 'Dst':
+        from sth_mamba_stateful import create_sth_mamba_stateful
+        model = create_sth_mamba_stateful(config)
     else:
         raise ValueError(f"Unknown branch: {branch_name}")
     
@@ -595,7 +603,7 @@ def main():
     # Train each branch
     results = {}
     for branch in args.branches:
-        if branch not in ['A', 'B', 'C', 'D', 'E', 'Bplus', 'Fusion', 'Essm', 'F', 'Fv4', 'Fv5', 'G', 'G_lstm', 'H']:
+        if branch not in ['A', 'B', 'C', 'D', 'E', 'Bplus', 'Fusion', 'Essm', 'F', 'Fv4', 'Fv5', 'G', 'G_lstm', 'H', 'Ast', 'Dst']:
             print(f"Warning: Unknown branch '{branch}', skipping...")
             continue
         
