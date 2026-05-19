@@ -232,9 +232,10 @@ def compute_spatial_attention_loss(feat_dict, spatial_alpha=1.0):
     s_attn = s_attn / (s_attn.norm() + 1e-8)
     
     # Upsample student attention to teacher resolution
-    s_attn_up = F.interpolate(s_attn, size=t_attn.shape[-2:], mode='bilinear')
+    s_attn_up = torch.nn.functional.interpolate(
+        s_attn, size=t_attn.shape[-2:], mode='bilinear')
     
-    loss_spatial = F.mse_loss(s_attn_up, t_attn)
+    loss_spatial = torch.nn.functional.mse_loss(s_attn_up, t_attn)
     return spatial_alpha * loss_spatial
 
 class FeatureHook:
