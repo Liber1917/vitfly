@@ -41,6 +41,7 @@ _BRANCH_MODEL_DIRS = [
     opj(os.path.dirname(os.path.abspath(__file__)), '../../experiments/mamba_branches/essm/models'),
     opj(os.path.dirname(os.path.abspath(__file__)), '../../experiments/mamba_branches/branch_F_lightweight_mamba3/models'),
     opj(os.path.dirname(os.path.abspath(__file__)), '../../experiments/mamba_branches/branch_G_cnn_baseline/models'),
+    opj(os.path.dirname(os.path.abspath(__file__)), '../../experiments/mamba_branches/branch_H_stateful_ssm/models'),
 ]
 for _d in _BRANCH_MODEL_DIRS:
     if _d not in sys.path:
@@ -56,6 +57,7 @@ try:
     from branch_f_model import BranchFModel, create_branch_f_model
     from branch_f_v5_model import BranchFV5Model, create_branch_f_v5_model
     from cnn_baseline_model import CNNMLPNet, CNNLSTMNet, create_cnn_baseline_model, create_cnn_lstm_model
+    from stateful_ssm_model import StatefulSSMNet, create_stateful_ssm_model
 except ImportError as _e:
     print(f"[RUN_COMPETITION] Warning: branch model import failed: {_e}")
 
@@ -196,6 +198,9 @@ class AgilePilotNode:
             elif model_type == 'CNNLSTMNet':
                 self.model = CNNLSTMNet().to(self.device).float()
                 print(f"[RUN_COMPETITION] G_lstm — CNNLSTMNet loaded (CNN+LSTM, {sum(p.numel() for p in self.model.parameters()):,} params)")
+            elif model_type == 'StatefulSSM':
+                self.model = StatefulSSMNet().to(self.device).float()
+                print(f"[RUN_COMPETITION] Branch H — StatefulSSMNet loaded (Stateful SSM temporal head, {sum(p.numel() for p in self.model.parameters()):,} params)")
             else:
                 print(f'[RUN_COMPETITION] Invalid model_type {model_type}. Exiting.')
                 exit()

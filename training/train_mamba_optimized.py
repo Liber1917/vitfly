@@ -2,7 +2,7 @@
 """
 Optimized training script for Mamba branches with maximum GPU utilization.
 
-Supports: A, B, C, D, E, Bplus, Fusion, Essm, F
+Supports: A, B, C, D, E, Bplus, Fusion, Essm, F, G, G_lstm, H
 
 Key Features:
 1. Mixed Precision Training (FP16) with torch.cuda.amp
@@ -45,6 +45,7 @@ sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/branch_E_decisionmam
 sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/branch_Bplus_mambavision_mamba3/models')
 sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/mambafusion/models')
 sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/essm/models')
+sys.path.insert(0, '/root/catkin_ws/src/vitfly-mambatest/experiments/mamba_branches/branch_H_stateful_ssm/models')
 sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/branch_F_lightweight_mamba3/models')
 sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/branch_G_cnn_baseline/models')
 
@@ -194,6 +195,9 @@ def create_model(branch_name, config, device, args=None):
     elif branch_name == 'G_lstm':
         from cnn_baseline_model import create_cnn_lstm_model
         model = create_cnn_lstm_model(config)
+    elif branch_name == 'H':
+        from stateful_ssm_model import create_stateful_ssm_model
+        model = create_stateful_ssm_model(config)
     else:
         raise ValueError(f"Unknown branch: {branch_name}")
     
@@ -590,7 +594,7 @@ def main():
     # Train each branch
     results = {}
     for branch in args.branches:
-        if branch not in ['A', 'B', 'C', 'D', 'E', 'Bplus', 'Fusion', 'Essm', 'F', 'Fv4', 'Fv5', 'G', 'G_lstm']:
+        if branch not in ['A', 'B', 'C', 'D', 'E', 'Bplus', 'Fusion', 'Essm', 'F', 'Fv4', 'Fv5', 'G', 'G_lstm', 'H']:
             print(f"Warning: Unknown branch '{branch}', skipping...")
             continue
         
