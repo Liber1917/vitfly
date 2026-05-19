@@ -103,13 +103,14 @@ VISUAL_ENCODER_ATTR = {
     'F': 'cnn_encoder',           # BranchFModel.cnn_encoder → 512-dim
     'Fv4': 'encoder',             # BranchFV4Model.encoder → 512-dim
     'G': 'encoder',               # CNNMLPNet.encoder → 256-dim
+    'H': 'encoder',               # StatefulSSMNet.encoder → 256-dim
 }
 
 # Visual feature dimension for each branch
 VISUAL_FEATURE_DIM = {
     'A': 512, 'B': 512, 'Bplus': 512,
     'C': 512, 'D': 256, 'E': 256, 'Fusion': 512,
-    'Essm': 256, 'F': 512, 'Fv4': 512, 'G': 256,
+    'Essm': 256, 'F': 512, 'Fv4': 512, 'G': 256, 'H': 256,
 }
 
 TEACHER_FEATURE_DIM = 512  # LSTMNetVIT.decoder output
@@ -160,7 +161,81 @@ class FeatureProjector(nn.Module):
         return self.proj(x)
 
 
-# ─── Hook Manager ─────────────────────────────────────────────────────────────
+# ─── Spatial Attention Hook Config ─────────────────────────────────────────
+# Maps: branch → (student_spatial_module_path, teacher_module_path, teacher_idx)
+# Where student/teacher spatial features before pooling produce (B,C,H,W)
+SPATIAL_HOOK_CONFIG = {
+    'E': {  # DecisionMamba: CNNEncoder.conv4 → (B,256,4,6)
+        'student_attr': 'cnn_encoder.conv4',
+        'teacher_attr': 'encoder_blocks',
+        'teacher_idx': -1,  # last block → (B,64,8,11)
+    },
+}
+
+
+def register_spatial_hooks(teacher, student, branch):
+    """Register hooks for spatial attention transfer.
+    
+    Returns (teacher_spatial_feat, student_spatial_feat) storage dict.
+    """
+    config = SPATIAL_HOOK_CONFIG.get(branch)
+    if config is None:
+        return None  # no spatial attention for this branch
+    
+    feat_dict = {}
+    
+    # Teacher spatial hook (detached, frozen)
+    teacher_block = teacher.encoder_blocks[config['teacher_idx']]
+    def make_teacher_spatial_hook():
+        def hook(m, i, o):
+            feat_dict['teacher_spatial'] = o.detach()
+        return hook
+    teacher_handle = teacher_block.register_forward_hook(
+        make_teacher_spatial_hook())
+    
+    # Student spatial hook (keeps gradients)
+    student_mod = student
+    for attr in config['student_attr'].split('.'):
+        student_mod = getattr(student_mod, attr)
+    def make_student_spatial_hook():
+        def hook(m, i, o):
+            feat_dict['student_spatial'] = o
+        return hook
+    student_handle = student_mod.register_forward_hook(
+        make_student_spatial_hook())
+    
+    feat_dict['handles'] = (teacher_handle, student_handle)
+    return feat_dict
+
+
+def compute_spatial_attention_loss(feat_dict, spatial_alpha=1.0):
+    """Compute attention transfer loss (Zagoruyko & Komodakis 2017).
+    
+    Attention map: sum(feature², dim=1) → collapse channel dim.
+    Student attention map upsampled to match teacher resolution.
+    """
+    if feat_dict is None:
+        return torch.tensor(0.0)
+    
+    t_feat = feat_dict.get('teacher_spatial')  # (B, Ct, Ht, Wt)
+    s_feat = feat_dict.get('student_spatial')  # (B, Cs, Hs, Ws)
+    
+    if t_feat is None or s_feat is None:
+        return torch.tensor(0.0)
+    
+    # Attention maps: collapse channels via squared mean
+    t_attn = t_feat.pow(2).mean(dim=1, keepdim=True)  # (B, 1, Ht, Wt)
+    s_attn = s_feat.pow(2).mean(dim=1, keepdim=True)  # (B, 1, Hs, Ws)
+    
+    # Normalize to prevent magnitude differences from dominating
+    t_attn = t_attn / (t_attn.norm() + 1e-8)
+    s_attn = s_attn / (s_attn.norm() + 1e-8)
+    
+    # Upsample student attention to teacher resolution
+    s_attn_up = F.interpolate(s_attn, size=t_attn.shape[-2:], mode='bilinear')
+    
+    loss_spatial = F.mse_loss(s_attn_up, t_attn)
+    return spatial_alpha * loss_spatial
 
 class FeatureHook:
     """Register forward hook to capture intermediate features."""
@@ -468,7 +543,8 @@ def get_lr_scheduler(optimizer, warmup_epochs, total_epochs):
 
 def train_distill_epoch(
     teacher, student, projector, loader, optimizer, scaler, device, epoch,
-    hook, alpha=1.0, beta=1.0, gamma=1.0, grad_accum_steps=1, clip_grad_norm=0.5,
+    hook, spatial_hooks=None, spatial_alpha=0.0,
+    alpha=1.0, beta=1.0, gamma=1.0, grad_accum_steps=1, clip_grad_norm=0.5,
     seq_len=1, T=1.0
 ):
     """Train one epoch with distillation."""
@@ -479,6 +555,7 @@ def train_distill_epoch(
     total_loss_feat = 0.0
     total_loss_distill = 0.0
     total_loss_gt = 0.0
+    total_loss_spatial = 0.0
     total_samples = 0
     
     optimizer.zero_grad()
@@ -518,6 +595,12 @@ def train_distill_epoch(
             student_out, _ = student([depth_f, vel_f, quat_f])
             student_feat = hook.get_student_feat()
             
+            # ── Spatial attention loss ──
+            if spatial_hooks is not None:
+                loss_spatial = compute_spatial_attention_loss(spatial_hooks, spatial_alpha)
+            else:
+                loss_spatial = torch.tensor(0.0, device=device)
+            
             # Reshape for seq mode
             if seq_len > 1:
                 student_out = student_out.reshape(B, S, -1)
@@ -545,7 +628,8 @@ def train_distill_epoch(
                     target, projector, alpha, beta, gamma
                 )
             
-            loss = loss_dict['loss'] / grad_accum_steps
+            loss = loss_dict['loss'] + loss_spatial
+            loss = loss / grad_accum_steps
         
         # Backward
         scaler.scale(loss).backward()
@@ -558,10 +642,11 @@ def train_distill_epoch(
             optimizer.zero_grad()
         
         # Accumulate
-        total_loss += loss_dict['loss'].item()
+        total_loss += loss_dict['loss'].item() + loss_spatial.item()
         total_loss_feat += loss_dict['loss_feat'].item()
         total_loss_distill += loss_dict['loss_distill'].item()
         total_loss_gt += loss_dict['loss_gt'].item()
+        total_loss_spatial += loss_spatial.item()
         total_samples += depth.size(0)
     
     # Handle remainder
@@ -578,6 +663,7 @@ def train_distill_epoch(
         'loss_feat': total_loss_feat / n_batches,
         'loss_distill': total_loss_distill / n_batches,
         'loss_gt': total_loss_gt / n_batches,
+        'loss_spatial': total_loss_spatial / n_batches,
     }
 
 
@@ -717,9 +803,13 @@ def train_distillation(branch, args, train_loader, val_loader, device):
     except Exception as e:
         print(f"  Warning: Student hook registration failed: {e}")
         print(f"  This may happen with torch.compile. Feature alignment disabled.")
-        # Feature alignment won't work, but distillation still runs
         if projector is not None:
             projector = None
+    
+    # Spatial attention hooks (for attention transfer loss)
+    spatial_hooks = register_spatial_hooks(teacher, student, branch)
+    if spatial_hooks is not None and args.spatial_alpha > 0:
+        print(f"  Spatial attention transfer enabled: α_spatial={args.spatial_alpha}")
     
     # Optimizer
     optimizer = optim.AdamW(student.parameters(), lr=args.lr, weight_decay=1e-4)
@@ -749,7 +839,8 @@ def train_distillation(branch, args, train_loader, val_loader, device):
         # Train
         train_metrics = train_distill_epoch(
             teacher, student, projector, train_loader, optimizer, scaler, device, epoch,
-            hook, alpha=args.alpha, beta=args.beta, gamma=args.gamma,
+            hook, spatial_hooks=spatial_hooks, spatial_alpha=args.spatial_alpha,
+            alpha=args.alpha, beta=args.beta, gamma=args.gamma,
             grad_accum_steps=args.grad_accum_steps, clip_grad_norm=args.clip_grad_norm,
             seq_len=args.sequence_length
         )
@@ -865,6 +956,9 @@ def main():
                         help='Output distillation loss weight (MOHAWK Stage 3)')
     parser.add_argument('--gamma', type=float, default=1.0,
                         help='Ground truth supervision weight')
+    parser.add_argument('--spatial_alpha', type=float, default=0.0,
+                        help='Spatial attention transfer weight (Zagoruyko 2017). '
+                             'Default 0.0 = disabled. Set to 0.1-1.0 for attention transfer.')
     parser.add_argument('--teacher-ckpt', type=str,
                         default='/root/vitfly/models/ViTLSTM_model.pth',
                         help='Path to teacher model checkpoint')
