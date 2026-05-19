@@ -45,6 +45,7 @@ sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/branch_E_decisionmam
 sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/branch_Bplus_mambavision_mamba3/models')
 sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/mambafusion/models')
 sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/essm/models')
+sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/branch_H_stateful_ssm/models')
 sys.path.insert(0, '/root/catkin_ws/src/vitfly-mambatest/experiments/mamba_branches/branch_H_stateful_ssm/models')
 sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/branch_F_lightweight_mamba3/models')
 sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/branch_G_cnn_baseline/models')
