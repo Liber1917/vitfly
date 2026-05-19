@@ -42,7 +42,6 @@ _BRANCH_MODEL_DIRS = [
     opj(os.path.dirname(os.path.abspath(__file__)), '../../experiments/mamba_branches/branch_F_lightweight_mamba3/models'),
     opj(os.path.dirname(os.path.abspath(__file__)), '../../experiments/mamba_branches/branch_G_cnn_baseline/models'),
     opj(os.path.dirname(os.path.abspath(__file__)), '../../experiments/mamba_branches/branch_H_stateful_ssm/models'),
-    opj(os.path.dirname(os.path.abspath(__file__)), '../../experiments/mamba_branches/branch_A_stateful_lstm/models'),
     opj(os.path.dirname(os.path.abspath(__file__)), '../../experiments/mamba_branches/branch_D_stateful_mamba2/models'),
 ]
 for _d in _BRANCH_MODEL_DIRS:
@@ -60,7 +59,6 @@ try:
     from branch_f_v5_model import BranchFV5Model, create_branch_f_v5_model
     from cnn_baseline_model import CNNMLPNet, CNNLSTMNet, create_cnn_baseline_model, create_cnn_lstm_model
     from stateful_ssm_model import StatefulSSMNet, create_stateful_ssm_model
-    from vmamba_stateful_lstm import VMambaStatefulLSTM, create_vmamba_stateful_lstm
     from sth_mamba_stateful import STHMambaStateful, create_sth_mamba_stateful
 except ImportError as _e:
     print(f"[RUN_COMPETITION] Warning: branch model import failed: {_e}")
@@ -205,9 +203,6 @@ class AgilePilotNode:
             elif model_type == 'StatefulSSM':
                 self.model = StatefulSSMNet().to(self.device).float()
                 print(f"[RUN_COMPETITION] Branch H — StatefulSSMNet loaded (Stateful SSM temporal head, {sum(p.numel() for p in self.model.parameters()):,} params)")
-            elif model_type == 'VMambaStatefulLSTM':
-                self.model = create_vmamba_stateful_lstm({}).to(self.device).float()
-                print(f"[RUN_COMPETITION] Branch Ast — VMambaStatefulLSTM loaded (VMamba + Stateful LSTM, {sum(p.numel() for p in self.model.parameters()):,} params)")
             elif model_type == 'STHMambaStateful':
                 self.model = create_sth_mamba_stateful({}).to(self.device).float()
                 print(f"[RUN_COMPETITION] Branch Dst — STHMambaStateful loaded (STH-Mamba + Stateful Mamba-2, {sum(p.numel() for p in self.model.parameters()):,} params)")
