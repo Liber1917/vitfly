@@ -219,11 +219,12 @@ def create_model(branch_name, config, device, args=None):
 
 
 def train_epoch(model, loader, optimizer, criterion, scaler, device, epoch, 
-                grad_accum_steps=1, clip_grad_norm=1.0, seq_len=1):
+                grad_accum_steps=1, clip_grad_norm=1.0, seq_len=1, branch_name=None):
     """Train for one epoch with mixed precision."""
     model.train()
     total_loss = 0.0
     total_samples = 0
+    is_stateful = branch_name in ('H', 'Dst')
     
     optimizer.zero_grad()
     
@@ -238,7 +239,11 @@ def train_epoch(model, loader, optimizer, criterion, scaler, device, epoch,
             continue
         
         with autocast(device_type='cuda', dtype=torch.bfloat16):
-            if seq_len > 1:
+            if seq_len > 1 and is_stateful:
+                # Stateful branches: pass 5D (B,S,C,H,W) — model loops frames internally
+                output, _ = model([depth, velocity, quat], None)
+                target_f = target[:, -1, :]  # loss on last frame only
+            elif seq_len > 1:
                 B, S = depth.shape[:2]
                 depth_f = depth.view(B * S, 1, depth.shape[-2], depth.shape[-1])
                 vel_f = velocity.reshape(B * S, -1)
@@ -284,9 +289,10 @@ def train_epoch(model, loader, optimizer, criterion, scaler, device, epoch,
     return total_loss / len(loader)
 
 
-def validate(model, loader, criterion, device, seq_len=1):
+def validate(model, loader, criterion, device, seq_len=1, branch_name=None):
     """Validate model performance."""
     model.eval()
+    is_stateful = branch_name in ("H", "Dst")
     total_loss = 0.0
 
     with torch.no_grad():
@@ -297,7 +303,10 @@ def validate(model, loader, criterion, device, seq_len=1):
             target = target.to(device, non_blocking=True)
             
             with autocast(device_type='cuda', dtype=torch.bfloat16):
-                if seq_len > 1:
+                if seq_len > 1 and is_stateful:
+                    output, _ = model([depth, velocity, quat], None)
+                    target_f = target[:, -1, :]
+                elif seq_len > 1:
                     B, S = depth.shape[:2]
                     depth_f = depth.view(B * S, 1, depth.shape[-2], depth.shape[-1])
                     vel_f = velocity.reshape(B * S, -1)
@@ -388,12 +397,12 @@ def train_branch(branch_name, args, train_loader, val_loader, device, model_conf
         # Train
         train_loss = train_epoch(
             model, train_loader, optimizer, criterion, scaler, device, epoch,
-            grad_accum_steps=args.grad_accum_steps, clip_grad_norm=args.clip_grad_norm,
-            seq_len=args.sequence_length
+            grad_accum_steps=args.grad_accum_steps, seq_len=args.sequence_length,
+            branch_name=args.branches if hasattr(args, 'branches') else args.branch_name if hasattr(args, 'branch_name') else None
         )
         
         # Validate
-        val_loss = validate(model, val_loader, criterion, device, seq_len=args.sequence_length)
+        val_loss = validate(model, val_loader, criterion, device, seq_len=args.sequence_length, branch_name=args.branches)
         
         # Update learning rate
         scheduler.step()
