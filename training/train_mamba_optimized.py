@@ -204,9 +204,15 @@ def create_model(branch_name, config, device, args=None):
     elif branch_name == 'H':
         from stateful_ssm_model import create_stateful_ssm_model
         model = create_stateful_ssm_model(config)
+    elif branch_name == 'Hs':
+        from stateful_ssm_model import create_stateful_ssm_model
+        model = create_stateful_ssm_model({'d_state': 4})
     elif branch_name == 'Dst':
         from sth_mamba_stateful import create_sth_mamba_stateful
         model = create_sth_mamba_stateful(config)
+    elif branch_name == 'Ds':
+        from sth_mamba_stateful import STHMambaStateful
+        model = STHMambaStateful(temporal_d_state=4)
     elif branch_name == 'ResE':
         from residual_ssm_net import create_residual_ssm
         model = create_residual_ssm(config)
@@ -240,7 +246,7 @@ def train_epoch(model, loader, optimizer, criterion, scaler, device, epoch,
     model.train()
     total_loss = 0.0
     total_samples = 0
-    is_stateful = branch_name in ('H', 'Dst')
+    is_stateful = branch_name in ('H', 'Hs', 'Dst')
     
     optimizer.zero_grad()
     
@@ -313,7 +319,7 @@ def train_epoch(model, loader, optimizer, criterion, scaler, device, epoch,
 def validate(model, loader, criterion, device, seq_len=1, branch_name=None):
     """Validate model performance."""
     model.eval()
-    is_stateful = branch_name in ("H", "Dst")
+    is_stateful = branch_name in ("H", "Hs", "Dst")
     total_loss = 0.0
 
     with torch.no_grad():
@@ -629,7 +635,7 @@ def main():
     # Train each branch
     results = {}
     for branch in args.branches:
-        if branch not in ['A', 'B', 'C', 'D', 'E', 'Bplus', 'Fusion', 'Essm', 'F', 'Fv4', 'Fv5', 'G', 'G_lstm', 'H', 'Dst', 'ResE', 'CrossE', 'LapE', 'ScanE']:
+        if branch not in ['A', 'B', 'C', 'D', 'E', 'Bplus', 'Fusion', 'Essm', 'F', 'Fv4', 'Fv5', 'G', 'G_lstm', 'H', 'Hs', 'Dst', 'Ds', 'ResE', 'CrossE', 'LapE', 'ScanE']:
             print(f"Warning: Unknown branch '{branch}', skipping...")
             continue
         
