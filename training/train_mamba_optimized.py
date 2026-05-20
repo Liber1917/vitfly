@@ -50,6 +50,10 @@ sys.path.insert(0, '/root/catkin_ws/src/vitfly-mambatest/experiments/mamba_branc
 sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/branch_F_lightweight_mamba3/models')
 sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/branch_G_cnn_baseline/models')
 sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/branch_D_stateful_mamba2/models')
+sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/branch_ScanE_spatial_ssm/models')
+sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/branch_LapE_laplace_mixer/models')
+sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/branch_CrossE_ssm_attn/models')
+sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/branch_ResE_residual_ssm/models')
 
 # Import models
 try:
@@ -203,6 +207,18 @@ def create_model(branch_name, config, device, args=None):
     elif branch_name == 'Dst':
         from sth_mamba_stateful import create_sth_mamba_stateful
         model = create_sth_mamba_stateful(config)
+    elif branch_name == 'ResE':
+        from residual_ssm_net import create_residual_ssm
+        model = create_residual_ssm(config)
+    elif branch_name == 'CrossE':
+        from cross_ssm_net import create_cross_ssm
+        model = create_cross_ssm(config)
+    elif branch_name == 'LapE':
+        from laplace_ssm_net import create_laplace_ssm
+        model = create_laplace_ssm(config)
+    elif branch_name == 'ScanE':
+        from scan_ssm_net import create_scan_ssm
+        model = create_scan_ssm(config)
     else:
         raise ValueError(f"Unknown branch: {branch_name}")
     
@@ -613,7 +629,7 @@ def main():
     # Train each branch
     results = {}
     for branch in args.branches:
-        if branch not in ['A', 'B', 'C', 'D', 'E', 'Bplus', 'Fusion', 'Essm', 'F', 'Fv4', 'Fv5', 'G', 'G_lstm', 'H', 'Dst']:
+        if branch not in ['A', 'B', 'C', 'D', 'E', 'Bplus', 'Fusion', 'Essm', 'F', 'Fv4', 'Fv5', 'G', 'G_lstm', 'H', 'Dst', 'ResE', 'CrossE', 'LapE', 'ScanE']:
             print(f"Warning: Unknown branch '{branch}', skipping...")
             continue
         
