@@ -43,6 +43,7 @@ _BRANCH_MODEL_DIRS = [
     opj(os.path.dirname(os.path.abspath(__file__)), '../../experiments/mamba_branches/branch_G_cnn_baseline/models'),
     opj(os.path.dirname(os.path.abspath(__file__)), '../../experiments/mamba_branches/branch_H_stateful_ssm/models'),
     opj(os.path.dirname(os.path.abspath(__file__)), '../../experiments/mamba_branches/branch_D_stateful_mamba2/models'),
+    opj(os.path.dirname(os.path.abspath(__file__)), '../../experiments/mamba_branches/branch_Ivim_vim_depth/models'),
 ]
 for _d in _BRANCH_MODEL_DIRS:
     if _d not in sys.path:
@@ -209,6 +210,17 @@ class AgilePilotNode:
             elif model_type == 'STHMambaStateful':
                 self.model = create_sth_mamba_stateful({}).to(self.device).float()
                 print(f"[RUN_COMPETITION] Branch Dst — STHMambaStateful loaded (STH-Mamba + Stateful Mamba-2, {sum(p.numel() for p in self.model.parameters()):,} params)")
+            elif model_type == 'STHMambaStateful_S':
+                self.model = STHMambaStateful(temporal_d_state=4).to(self.device).float()
+                print(f"[RUN_COMPETITION] Branch Ds — STHMambaStateful-S loaded (d_state=4 Mamba-2, {sum(p.numel() for p in self.model.parameters()):,} params)")
+            elif model_type == 'EStatefulModel':
+                from e_stateful_model import EStatefulModel, create_e_stateful
+                self.model = create_e_stateful({'embed_dim': 256}).to(self.device).float()
+                print(f"[RUN_COMPETITION] Branch E_s — EStatefulModel loaded (Stateful DecisionMamba, {sum(p.numel() for p in self.model.parameters()):,} params)")
+            elif model_type == 'ViMDepth':
+                from vim_depth_model import create_vim_depth
+                self.model = create_vim_depth({}).to(self.device).float()
+                print(f"[RUN_COMPETITION] Branch ViM — ViMDepth loaded (Pure bidirectional Mamba depth→patches→velocity, {sum(p.numel() for p in self.model.parameters()):,} params)")
             elif model_type == 'STHMambaStateful_S':
                 self.model = STHMambaStateful(temporal_d_state=4).to(self.device).float()
                 print(f"[RUN_COMPETITION] Branch Ds — STHMambaStateful-S loaded (d_state=4 Mamba-2, {sum(p.numel() for p in self.model.parameters()):,} params)")
