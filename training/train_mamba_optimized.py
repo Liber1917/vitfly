@@ -55,6 +55,7 @@ sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/branch_ScanE_spatial
 sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/branch_LapE_laplace_mixer/models')
 sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/branch_CrossE_ssm_attn/models')
 sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/branch_ResE_residual_ssm/models')
+sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/branch_Ivim_vim_depth/models')
 
 # Import models
 try:
@@ -229,6 +230,9 @@ def create_model(branch_name, config, device, args=None):
     elif branch_name == 'ScanE':
         from scan_ssm_net import create_scan_ssm
         model = create_scan_ssm(config)
+    elif branch_name == 'ViM':
+        from vim_depth_model import create_vim_depth
+        model = create_vim_depth(config)
     else:
         raise ValueError(f"Unknown branch: {branch_name}")
     
@@ -639,7 +643,7 @@ def main():
     # Train each branch
     results = {}
     for branch in args.branches:
-        if branch not in ['A', 'B', 'C', 'D', 'E', 'Bplus', 'Fusion', 'Essm', 'F', 'Fv4', 'Fv5', 'G', 'G_lstm', 'H', 'Hs', 'Dst', 'Ds', 'E_s', 'ResE', 'CrossE', 'LapE', 'ScanE']:
+        if branch not in ['A', 'B', 'C', 'D', 'E', 'Bplus', 'Fusion', 'Essm', 'F', 'Fv4', 'Fv5', 'G', 'G_lstm', 'H', 'Hs', 'Dst', 'Ds', 'E_s', 'ResE', 'CrossE', 'LapE', 'ScanE', 'ViM']:
             print(f"Warning: Unknown branch '{branch}', skipping...")
             continue
         
