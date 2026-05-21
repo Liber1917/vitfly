@@ -1,0 +1,7 @@
+control_jerk: 0.4989
+lateral_cmd_var: 2.1354
+num_samples: 352
+tracking_mae_total: 1.1216
+tracking_mae_x: 0.7592
+tracking_mae_y: 2.0128
+tracking_mae_z: 0.5929
