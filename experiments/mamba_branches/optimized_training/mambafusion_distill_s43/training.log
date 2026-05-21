@@ -1,0 +1,446 @@
+
+Using device: cuda
+  GPU: NVIDIA GeForce RTX 5090
+  CUDA: 12.8
+
+Loading data from: /root/vitfly/training/datasets/data_full
+[LAZY DATALOADER] Building file path index...
+[LAZY DATALOADER] Found 580 trajectory folders
+[LAZY DATALOADER] Indexing folder 170743180219, folder # 1/580, time elapsed 0.00s
+[LAZY DATALOADER] Row count mismatch in 170702544200: 145 images vs 144 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170700356261: 146 images vs 148 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170727054032: 314 images vs 324 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170702066582: 167 images vs 166 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725978329: 289 images vs 288 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170700392515: 126 images vs 128 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725204479: 175 images vs 174 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725441209: 195 images vs 194 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726408142: 251 images vs 250 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726361198: 269 images vs 268 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170702553098: 131 images vs 130 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726053966: 390 images vs 394 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726059362: 386 images vs 416 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726694586: 309 images vs 316 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170702071938: 161 images vs 162 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170699853233: 41 images vs 40 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726511097: 246 images vs 248 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726278957: 221 images vs 220 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692570022: 53 images vs 52 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692597401: 53 images vs 52 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725588169: 193 images vs 192 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170702446827: 203 images vs 202 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170743215994: 387 images vs 434 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725647575: 123 images vs 122 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692612875: 53 images vs 52 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170702097491: 161 images vs 160 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726264087: 243 images vs 242 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170702037462: 129 images vs 128 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692408193: 65 images vs 64 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725463806: 141 images vs 140 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725577457: 129 images vs 128 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170727028448: 225 images vs 224 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725495945: 179 images vs 178 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725517367: 221 images vs 220 CSV rows, skipping
+[LAZY DATALOADER] Indexing folder 170726366564, folder # 59/580, time elapsed 0.19s
+[LAZY DATALOADER] Row count mismatch in 170726366564: 362 images vs 364 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170700218481: 115 images vs 114 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726934574: 249 images vs 248 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725560804: 226 images vs 234 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170699885280: 41 images vs 40 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726958902: 287 images vs 286 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725582221: 199 images vs 198 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692341541: 85 images vs 84 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170743158249: 542 images vs 556 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725664235: 145 images vs 144 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726012265: 271 images vs 270 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726065324: 358 images vs 374 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170699931609: 69 images vs 68 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726974308: 354 images vs 360 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725171769: 197 images vs 198 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725242543: 217 images vs 216 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725814468: 77 images vs 76 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726838397: 212 images vs 214 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170743072172: 405 images vs 404 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726007494: 325 images vs 324 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692416519: 107 images vs 106 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725299098: 163 images vs 162 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725554855: 195 images vs 194 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726351079: 271 images vs 270 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725457863: 255 images vs 254 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170702513896: 221 images vs 224 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726761024: 293 images vs 300 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725403764: 221 images vs 220 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725188423: 225 images vs 224 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170702042209: 169 images vs 168 CSV rows, skipping
+[LAZY DATALOADER] Indexing folder 170726949382, folder # 117/580, time elapsed 0.28s
+[LAZY DATALOADER] Row count mismatch in 170726949382: 233 images vs 232 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170727073640: 259 images vs 280 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170700378855: 135 images vs 134 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692432019: 53 images vs 52 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692579559: 45 images vs 44 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170700265390: 145 images vs 144 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170743105421: 569 images vs 656 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726749357: 370 images vs 402 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170699919107: 45 images vs 44 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726520014: 199 images vs 198 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692347491: 65 images vs 64 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692326650: 115 images vs 114 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692391515: 139 images vs 138 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170699929218: 55 images vs 54 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725828715: 146 images vs 148 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725841776: 191 images vs 190 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726268820: 259 images vs 258 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692535018: 77 images vs 76 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170743221934: 414 images vs 434 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726140918: 293 images vs 292 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170699798770: 69 images vs 68 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170700419247: 145 images vs 144 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726824138: 237 images vs 246 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726979646: 259 images vs 258 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726164683: 307 images vs 306 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170702057070: 105 images vs 104 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170702092133: 181 images vs 180 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170700423994: 141 images vs 140 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170700208213: 165 images vs 164 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726812669: 233 images vs 236 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170743321068: 291 images vs 290 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726299189: 251 images vs 250 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170743123829: 475 images vs 474 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725198540: 210 images vs 214 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170700227997: 159 images vs 158 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726122376: 251 images vs 250 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170699845526: 37 images vs 36 CSV rows, skipping
+[LAZY DATALOADER] Indexing folder 170725479254, folder # 175/580, time elapsed 0.37s
+[LAZY DATALOADER] Row count mismatch in 170725479254: 179 images vs 178 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170700369348: 125 images vs 124 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726677554: 249 images vs 248 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725715402: 145 images vs 144 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692436812: 47 images vs 46 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725373433: 171 images vs 170 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726700659: 282 images vs 312 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726744508: 187 images vs 186 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170700319413: 149 images vs 148 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170699890625: 55 images vs 54 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692372432: 121 images vs 120 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692388522: 107 images vs 106 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725337161: 283 images vs 282 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725277072: 187 images vs 186 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726492010: 325 images vs 324 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692472528: 85 images vs 84 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170702509743: 107 images vs 106 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170702562000: 227 images vs 230 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170700279060: 147 images vs 146 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692344508: 73 images vs 72 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725622069: 143 images vs 142 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726739038: 313 images vs 360 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726318860: 241 images vs 240 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692602150: 51 images vs 50 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170743296709: 339 images vs 350 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726022382: 260 images vs 274 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725668987: 163 images vs 162 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170727023088: 243 images vs 242 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170699924457: 31 images vs 30 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726283699: 339 images vs 338 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692562331: 51 images vs 50 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692361160: 133 images vs 132 CSV rows, skipping
+[LAZY DATALOADER] Indexing folder 170726852651, folder # 233/580, time elapsed 0.46s
+[LAZY DATALOADER] Row count mismatch in 170726852651: 368 images vs 396 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725366886: 313 images vs 312 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726689120: 213 images vs 212 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170743278897: 462 images vs 536 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170743315715: 380 images vs 400 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725378773: 400 images vs 428 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726043239: 237 images vs 238 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726723228: 257 images vs 256 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726427777: 273 images vs 272 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170743249220: 367 images vs 402 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725501908: 153 images vs 152 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692577179: 59 images vs 58 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726862746: 294 images vs 324 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726482492: 289 images vs 288 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170699869244: 45 images vs 44 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725507255: 222 images vs 228 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726778115: 268 images vs 282 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725315155: 207 images vs 206 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170702475946: 171 images vs 170 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170702024385: 109 images vs 108 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725657088: 362 images vs 380 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726882938: 236 images vs 244 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170743255138: 474 images vs 520 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725819229: 81 images vs 80 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170702471193: 179 images vs 178 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170700383606: 91 images vs 90 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726239690: 308 images vs 310 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726939308: 217 images vs 216 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726150418: 267 images vs 266 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725304466: 129 images vs 128 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170727088467: 360 images vs 402 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725527463: 181 images vs 180 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170743242707: 442 images vs 494 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725236576: 225 images vs 224 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170743130358: 499 images vs 498 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726249215: 280 images vs 286 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170700246399: 99 images vs 98 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692670033: 59 images vs 58 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692369465: 79 images vs 78 CSV rows, skipping
+[LAZY DATALOADER] Indexing folder 170725293151, folder # 291/580, time elapsed 0.56s
+[LAZY DATALOADER] Row count mismatch in 170700222636: 157 images vs 156 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726887690: 281 images vs 280 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170700241053: 207 images vs 206 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726473577: 211 images vs 210 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726244458: 237 images vs 236 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170702010728: 103 images vs 102 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170743117887: 413 images vs 412 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170727033217: 241 images vs 240 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170743165379: 486 images vs 546 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692572394: 55 images vs 54 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726755565: 286 images vs 328 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170699909594: 45 images vs 46 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726954134: 239 images vs 238 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170700337839: 139 images vs 138 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692400444: 115 images vs 114 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170700232744: 105 images vs 104 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692610493: 49 images vs 48 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170743144003: 527 images vs 526 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725266365: 175 images vs 174 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170699801689: 45 images vs 44 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726388586: 273 images vs 272 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725631541: 139 images vs 138 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726303376: 331 images vs 330 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170743205912: 372 images vs 414 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692410562: 135 images vs 134 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726106923: 251 images vs 250 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170702452193: 170 images vs 172 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725532836: 195 images vs 194 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170727083727: 290 images vs 292 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725183055: 149 images vs 148 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725355596: 199 images vs 198 CSV rows, skipping
+[LAZY DATALOADER] Indexing folder 170726898351, folder # 349/580, time elapsed 0.66s
+[LAZY DATALOADER] Row count mismatch in 170726944046: 347 images vs 384 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726403391: 191 images vs 190 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726412873: 225 images vs 230 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170699933982: 65 images vs 64 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692584317: 99 images vs 98 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170699814715: 35 images vs 34 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170700283787: 145 images vs 148 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726995115: 199 images vs 198 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170700328313: 155 images vs 154 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692413556: 131 images vs 130 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725636293: 135 images vs 134 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170702576255: 248 images vs 254 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170699911969: 37 images vs 36 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692445114: 65 images vs 64 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170699855611: 91 images vs 90 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726174211: 309 images vs 308 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170699871611: 49 images vs 48 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725863161: 145 images vs 144 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692587275: 65 images vs 64 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726506306: 232 images vs 238 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725332414: 158 images vs 164 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726450394: 203 images vs 202 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726497392: 249 images vs 248 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170743211265: 345 images vs 372 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726169449: 261 images vs 260 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726454556: 201 images vs 200 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726878203: 231 images vs 230 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725566753: 153 images vs 152 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725409726: 155 images vs 154 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726828879: 189 images vs 188 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725988431: 319 images vs 318 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726893003: 303 images vs 306 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170743196869: 401 images vs 434 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692592652: 61 images vs 60 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170702020245: 119 images vs 118 CSV rows, skipping
+[LAZY DATALOADER] Indexing folder 170726159942, folder # 407/580, time elapsed 0.74s
+[LAZY DATALOADER] Row count mismatch in 170702501453: 123 images vs 126 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170699831279: 55 images vs 54 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726801133: 275 images vs 320 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692475538: 43 images vs 42 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725231234: 147 images vs 146 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725538780: 183 images vs 182 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692335583: 63 images vs 62 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692338554: 69 images vs 68 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692453451: 59 images vs 58 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725220546: 165 images vs 164 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170702524605: 217 images vs 232 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692397470: 119 images vs 118 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170702014887: 230 images vs 238 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726314091: 263 images vs 262 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170700433509: 105 images vs 104 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726432552: 225 images vs 224 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170700236906: 129 images vs 128 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170743273549: 319 images vs 318 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726084299: 301 images vs 300 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726207541: 299 images vs 298 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692375422: 89 images vs 88 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170700346766: 151 images vs 150 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726254574: 261 images vs 260 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726868099: 283 images vs 282 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726985004: 235 images vs 234 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170727068279: 321 images vs 364 CSV rows, skipping
+[LAZY DATALOADER] Indexing folder 170726766532, folder # 465/580, time elapsed 0.82s
+[LAZY DATALOADER] Row count mismatch in 170702004765: 260 images vs 276 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170700333084: 157 images vs 156 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726377271: 299 images vs 298 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725993189: 341 images vs 340 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726136699: 225 images vs 224 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170699900103: 41 images vs 40 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725215196: 185 images vs 184 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725309222: 225 images vs 224 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170700324166: 89 images vs 88 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726197429: 327 images vs 326 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726842541: 251 images vs 268 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726178984: 273 images vs 272 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692323673: 137 images vs 136 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170727004041: 231 images vs 230 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692551638: 83 images vs 82 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726323620: 285 images vs 284 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726234364: 259 images vs 258 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692467197: 39 images vs 38 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170743267611: 415 images vs 442 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725468563: 141 images vs 140 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170743261687: 457 images vs 526 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725856033: 165 images vs 164 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726273618: 365 images vs 364 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725430539: 183 images vs 182 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170727078390: 246 images vs 252 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726071279: 267 images vs 276 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725687425: 336 images vs 362 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726458724: 228 images vs 232 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726027139: 345 images vs 344 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726795076: 225 images vs 224 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692434420: 55 images vs 54 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170743236749: 367 images vs 366 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726048009: 303 images vs 302 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726908452: 257 images vs 256 CSV rows, skipping
+[LAZY DATALOADER] Indexing folder 170699842543, folder # 523/580, time elapsed 0.92s
+[LAZY DATALOADER] Row count mismatch in 170699842543: 69 images vs 68 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726080166: 231 images vs 230 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725321119: 139 images vs 138 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170699892982: 63 images vs 62 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726468225: 269 images vs 268 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725674343: 346 images vs 360 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725681475: 253 images vs 252 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170727099746: 279 images vs 296 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170727048088: 399 images vs 438 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170727111037: 221 images vs 220 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692455831: 97 images vs 96 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726131920: 317 images vs 316 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170700387766: 153 images vs 152 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170725343691: 185 images vs 184 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726969542: 213 images vs 212 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726183734: 255 images vs 254 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170699897724: 37 images vs 38 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726913196: 285 images vs 294 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726999275: 248 images vs 260 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170743284845: 378 images vs 398 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170700255883: 105 images vs 104 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726127157: 249 images vs 248 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170700360435: 129 images vs 128 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726217679: 287 images vs 286 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726445644: 227 images vs 226 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726111655: 330 images vs 364 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726436703: 205 images vs 204 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170692355205: 117 images vs 116 CSV rows, skipping
+[LAZY DATALOADER] Row count mismatch in 170726683648: 195 images vs 196 CSV rows, skipping
+[LAZY DATALOADER] Indexed 42156 samples
+[LAZY DATALOADER] Skipped 327 folders, 67920 images
+[LAZY DATALOADER] Indexing took 1.01s
+[LAZY DATALOADER] Train samples: 33725
+[LAZY DATALOADER] Val samples: 8431
+  Training samples: 33725
+  Validation samples: 8431
+
+############################################################
+# Starting distillation for Branch Fusion
+############################################################
+
+============================================================
+Distillation Training: Branch Fusion
+  Teacher: ViT+LSTM (frozen)
+  Student: Fusion
+  Loss weights: α=1.0, β=1.0, γ=1.0
+============================================================
+
+============================================================
+Loading Teacher: ViT+LSTM (TeacherVITLSTM, ckpt-compatible)
+============================================================
+  Loaded teacher from: /root/vitfly/models/ViTLSTM_model.pth
+  Teacher parameters: 3,563,663 (3.56M)
+  Teacher frozen: True
+  Student (Fusion) parameters: 3,186,307 (3.19M)
+
+Starting distillation for 50 epochs...
+  Batch size: 32, Grad accum: 1
+  Sequence length: 1
+Epoch   1/50 | Tr:12.7388 (feat:10.9913 dist:0.5784 gt:1.1690) | Val gt:1.0496 dist:0.5639 feat:11.4496 | mag:0.730 var:0.0155 | LR:0.000040 | 70s
+  ★ Best model! score=1.3316 (gt=1.0496 distill=0.5639)
+Epoch   2/50 | Tr:12.8986 (feat:11.2251 dist:0.5900 gt:1.0835) | Val gt:0.9978 dist:0.6214 feat:11.5159 | mag:0.765 var:0.0232 | LR:0.000060 | 61s
+  ★ Best model! score=1.3085 (gt=0.9978 distill=0.6214)
+Epoch   3/50 | Tr:12.9293 (feat:11.2874 dist:0.5986 gt:1.0433) | Val gt:0.9977 dist:0.5887 feat:11.5161 | mag:0.765 var:0.0299 | LR:0.000080 | 62s
+  ★ Best model! score=1.2920 (gt=0.9977 distill=0.5887)
+Epoch   4/50 | Tr:12.8917 (feat:11.2752 dist:0.6039 gt:1.0125) | Val gt:0.9248 dist:0.6600 feat:11.5311 | mag:0.813 var:0.0212 | LR:0.000100 | 60s
+  ★ Best model! score=1.2549 (gt=0.9248 distill=0.6600)
+Epoch   5/50 | Tr:12.8120 (feat:11.2210 dist:0.6135 gt:0.9775) | Val gt:0.8903 dist:0.6602 feat:11.6034 | mag:0.809 var:0.0273 | LR:0.000100 | 60s
+  ★ Best model! score=1.2204 (gt=0.8903 distill=0.6602)
+Epoch   6/50 | Tr:12.7110 (feat:11.1493 dist:0.6262 gt:0.9355) | Val gt:0.9426 dist:0.5767 feat:11.4907 | mag:0.766 var:0.0196 | LR:0.000100 | 61s
+Epoch   7/50 | Tr:12.6686 (feat:11.1304 dist:0.6356 gt:0.9026) | Val gt:0.8818 dist:0.6410 feat:11.5220 | mag:0.799 var:0.0342 | LR:0.000100 | 60s
+  ★ Best model! score=1.2024 (gt=0.8818 distill=0.6410)
+Epoch   8/50 | Tr:12.6268 (feat:11.1009 dist:0.6459 gt:0.8800) | Val gt:0.8997 dist:0.6002 feat:11.3981 | mag:0.782 var:0.0302 | LR:0.000099 | 61s
+  ★ Best model! score=1.1998 (gt=0.8997 distill=0.6002)
+Epoch   9/50 | Tr:12.6134 (feat:11.1029 dist:0.6539 gt:0.8566) | Val gt:0.7966 dist:0.7113 feat:11.3697 | mag:0.817 var:0.0371 | LR:0.000098 | 58s
+  ★ Best model! score=1.1522 (gt=0.7966 distill=0.7113)
+Epoch  10/50 | Tr:12.5602 (feat:11.0606 dist:0.6585 gt:0.8411) | Val gt:0.8577 dist:0.6314 feat:11.3346 | mag:0.786 var:0.0377 | LR:0.000097 | 62s
+Epoch  11/50 | Tr:12.5533 (feat:11.0634 dist:0.6661 gt:0.8238) | Val gt:0.8445 dist:0.6457 feat:11.3378 | mag:0.787 var:0.0373 | LR:0.000096 | 60s
+Epoch  12/50 | Tr:12.5111 (feat:11.0299 dist:0.6700 gt:0.8112) | Val gt:0.8834 dist:0.6062 feat:11.3101 | mag:0.778 var:0.0410 | LR:0.000094 | 62s
+Epoch  13/50 | Tr:12.5057 (feat:11.0318 dist:0.6717 gt:0.8022) | Val gt:0.8242 dist:0.6754 feat:11.3190 | mag:0.813 var:0.0440 | LR:0.000092 | 61s
+Epoch  14/50 | Tr:12.4825 (feat:11.0133 dist:0.6764 gt:0.7927) | Val gt:0.8870 dist:0.5978 feat:11.2428 | mag:0.785 var:0.0456 | LR:0.000090 | 62s
+Epoch  15/50 | Tr:12.4727 (feat:11.0079 dist:0.6816 gt:0.7833) | Val gt:0.8680 dist:0.6087 feat:11.4102 | mag:0.773 var:0.0329 | LR:0.000088 | 58s
+Epoch  16/50 | Tr:12.4776 (feat:11.0184 dist:0.6825 gt:0.7768) | Val gt:0.8677 dist:0.6171 feat:11.2883 | mag:0.786 var:0.0427 | LR:0.000086 | 62s
+Epoch  17/50 | Tr:12.4671 (feat:11.0141 dist:0.6840 gt:0.7691) | Val gt:0.8975 dist:0.5826 feat:11.2560 | mag:0.771 var:0.0434 | LR:0.000083 | 60s
+Epoch  18/50 | Tr:12.4648 (feat:11.0141 dist:0.6876 gt:0.7630) | Val gt:0.8340 dist:0.6586 feat:11.3079 | mag:0.795 var:0.0450 | LR:0.000081 | 61s
+Epoch  19/50 | Tr:12.4506 (feat:11.0056 dist:0.6874 gt:0.7576) | Val gt:0.8441 dist:0.6537 feat:11.2816 | mag:0.799 var:0.0516 | LR:0.000078 | 57s
+Epoch  20/50 | Tr:12.4492 (feat:11.0096 dist:0.6881 gt:0.7516) | Val gt:0.8539 dist:0.6330 feat:11.2005 | mag:0.790 var:0.0471 | LR:0.000075 | 50s
+Epoch  21/50 | Tr:12.4310 (feat:10.9888 dist:0.6920 gt:0.7502) | Val gt:0.8449 dist:0.6329 feat:11.2892 | mag:0.785 var:0.0428 | LR:0.000072 | 50s
+Epoch  22/50 | Tr:12.4290 (feat:10.9889 dist:0.6932 gt:0.7469) | Val gt:0.8780 dist:0.6077 feat:11.2216 | mag:0.777 var:0.0474 | LR:0.000069 | 50s
+Epoch  23/50 | Tr:12.4056 (feat:10.9708 dist:0.6925 gt:0.7423) | Val gt:0.8803 dist:0.6040 feat:11.2352 | mag:0.772 var:0.0442 | LR:0.000065 | 61s
+Epoch  24/50 | Tr:12.4245 (feat:10.9900 dist:0.6933 gt:0.7413) | Val gt:0.8648 dist:0.6190 feat:11.2076 | mag:0.785 var:0.0467 | LR:0.000062 | 61s
+Epoch  25/50 | Tr:12.4007 (feat:10.9681 dist:0.6951 gt:0.7374) | Val gt:0.8268 dist:0.6586 feat:11.2033 | mag:0.793 var:0.0468 | LR:0.000059 | 62s
+  → Saved checkpoint: /root/vitfly/experiments/mamba_branches/optimized_training/mambafusion_distill_s43/branch_Fusion/distill_checkpoint_epoch_25.pth
+Epoch  26/50 | Tr:12.3734 (feat:10.9421 dist:0.6949 gt:0.7364) | Val gt:0.8427 dist:0.6399 feat:11.2081 | mag:0.786 var:0.0416 | LR:0.000055 | 61s
+Epoch  27/50 | Tr:12.3600 (feat:10.9309 dist:0.6956 gt:0.7335) | Val gt:0.8464 dist:0.6372 feat:11.1990 | mag:0.790 var:0.0464 | LR:0.000052 | 62s
+Epoch  28/50 | Tr:12.3418 (feat:10.9125 dist:0.6965 gt:0.7328) | Val gt:0.8248 dist:0.6671 feat:11.1560 | mag:0.799 var:0.0467 | LR:0.000048 | 62s
+Epoch  29/50 | Tr:12.3327 (feat:10.9044 dist:0.6974 gt:0.7309) | Val gt:0.8635 dist:0.6195 feat:11.1496 | mag:0.778 var:0.0456 | LR:0.000045 | 61s
+Epoch  30/50 | Tr:12.3243 (feat:10.8981 dist:0.6977 gt:0.7285) | Val gt:0.8510 dist:0.6336 feat:11.1448 | mag:0.789 var:0.0472 | LR:0.000041 | 61s
+Epoch  31/50 | Tr:12.3127 (feat:10.8879 dist:0.6979 gt:0.7269) | Val gt:0.8676 dist:0.6153 feat:11.1216 | mag:0.781 var:0.0476 | LR:0.000038 | 62s
+Epoch  32/50 | Tr:12.2997 (feat:10.8760 dist:0.6980 gt:0.7258) | Val gt:0.8529 dist:0.6307 feat:11.1151 | mag:0.786 var:0.0458 | LR:0.000035 | 62s
+Epoch  33/50 | Tr:12.2868 (feat:10.8653 dist:0.6979 gt:0.7237) | Val gt:0.8247 dist:0.6672 feat:11.0965 | mag:0.798 var:0.0464 | LR:0.000031 | 62s
+Epoch  34/50 | Tr:12.2795 (feat:10.8568 dist:0.6992 gt:0.7236) | Val gt:0.8705 dist:0.6113 feat:11.0969 | mag:0.777 var:0.0444 | LR:0.000028 | 62s
+Epoch  35/50 | Tr:12.2727 (feat:10.8475 dist:0.7011 gt:0.7241) | Val gt:0.8658 dist:0.6182 feat:11.0893 | mag:0.781 var:0.0447 | LR:0.000025 | 62s
+Epoch  36/50 | Tr:12.2566 (feat:10.8339 dist:0.6996 gt:0.7231) | Val gt:0.8469 dist:0.6423 feat:11.0787 | mag:0.790 var:0.0489 | LR:0.000022 | 62s
+Epoch  37/50 | Tr:12.2514 (feat:10.8292 dist:0.7005 gt:0.7217) | Val gt:0.8348 dist:0.6502 feat:11.0877 | mag:0.792 var:0.0445 | LR:0.000019 | 61s
+Epoch  38/50 | Tr:12.2437 (feat:10.8226 dist:0.6998 gt:0.7212) | Val gt:0.8414 dist:0.6423 feat:11.0745 | mag:0.789 var:0.0448 | LR:0.000017 | 61s
+Epoch  39/50 | Tr:12.2372 (feat:10.8152 dist:0.7009 gt:0.7211) | Val gt:0.8442 dist:0.6406 feat:11.0640 | mag:0.789 var:0.0458 | LR:0.000014 | 60s
+Epoch  40/50 | Tr:12.2338 (feat:10.8129 dist:0.7011 gt:0.7199) | Val gt:0.8472 dist:0.6397 feat:11.0555 | mag:0.788 var:0.0466 | LR:0.000012 | 60s
+Epoch  41/50 | Tr:12.2308 (feat:10.8095 dist:0.7018 gt:0.7195) | Val gt:0.8601 dist:0.6240 feat:11.0534 | mag:0.780 var:0.0450 | LR:0.000010 | 58s
+Epoch  42/50 | Tr:12.2226 (feat:10.8025 dist:0.7011 gt:0.7190) | Val gt:0.8463 dist:0.6384 feat:11.0528 | mag:0.787 var:0.0450 | LR:0.000008 | 61s
+Epoch  43/50 | Tr:12.2204 (feat:10.7975 dist:0.7028 gt:0.7201) | Val gt:0.8455 dist:0.6414 feat:11.0407 | mag:0.788 var:0.0464 | LR:0.000006 | 62s
+Epoch  44/50 | Tr:12.2146 (feat:10.7970 dist:0.7004 gt:0.7172) | Val gt:0.8513 dist:0.6344 feat:11.0448 | mag:0.785 var:0.0465 | LR:0.000004 | 62s
+Epoch  45/50 | Tr:12.2150 (feat:10.7946 dist:0.7014 gt:0.7190) | Val gt:0.8419 dist:0.6452 feat:11.0517 | mag:0.790 var:0.0463 | LR:0.000003 | 61s
+Epoch  46/50 | Tr:12.2116 (feat:10.7915 dist:0.7020 gt:0.7181) | Val gt:0.8515 dist:0.6342 feat:11.0431 | mag:0.785 var:0.0458 | LR:0.000002 | 60s
+Epoch  47/50 | Tr:12.2089 (feat:10.7899 dist:0.7010 gt:0.7180) | Val gt:0.8464 dist:0.6387 feat:11.0491 | mag:0.786 var:0.0452 | LR:0.000001 | 56s
+Epoch  48/50 | Tr:12.2073 (feat:10.7887 dist:0.7012 gt:0.7175) | Val gt:0.8470 dist:0.6380 feat:11.0436 | mag:0.787 var:0.0453 | LR:0.000000 | 57s
+Epoch  49/50 | Tr:12.2058 (feat:10.7882 dist:0.7001 gt:0.7175) | Val gt:0.8479 dist:0.6384 feat:11.0397 | mag:0.787 var:0.0460 | LR:0.000000 | 61s
+Epoch  50/50 | Tr:12.2069 (feat:10.7879 dist:0.7026 gt:0.7163) | Val gt:0.8474 dist:0.6384 feat:11.0460 | mag:0.786 var:0.0457 | LR:0.000000 | 56s
+  → Saved checkpoint: /root/vitfly/experiments/mamba_branches/optimized_training/mambafusion_distill_s43/branch_Fusion/distill_checkpoint_epoch_50.pth
+
+Branch Fusion distillation completed!
+  Best val_score: 1.1522 (gt=0.7966 distill=0.7113)
+
+============================================================
+Distillation Summary
+============================================================
+  Branch Fusion: val_score=1.1522
+
+Checkpoints saved to: /root/vitfly/experiments/mamba_branches/optimized_training/mambafusion_distill_s43
+Loss weights: α=1.0 (feat), β=1.0 (distill), γ=1.0 (GT)
