@@ -107,7 +107,7 @@ def compute_command_vision_based(state, orig_img, prev_img, desiredVel, trained_
     _is_legacy_lstm = ('LSTMNet' in _class and 'CNNLSTM' not in _class) or _class == 'UNetConvLSTMNet'
     # Branch B/C/D/E are stateless (no LSTM hidden state)
     _is_branch_bce = _class in ('MambaVisionSSMNet', 'CNNMamba3Net', 'STHMambaNet', 'DecisionMambaNet', 'BPlusModel', 'MambaFusion', 'EssmNet', 'BranchFModel', 'BranchFV5Model', 'CNNMLPNet', 'CNNLSTMNet', 'StatefulSSMNet')
-    _is_stateful_branch = _class in ('STHMambaStateful',)  # stateful SSM that accepts hidden_state
+    _is_stateful_branch = _class in ('STHMambaStateful', 'StatefulSSMNet', 'EStatefulModel')  # stateful SSM that accepts hidden_state
 
     if _is_legacy_lstm or _is_vmamba_lstm:
         if _class == 'LSTMNet':
@@ -151,7 +151,10 @@ def compute_command_vision_based(state, orig_img, prev_img, desiredVel, trained_
         # Stateful models: pass hidden_state across frames for true temporal inference
         vel_tensor = torch.tensor([[desiredVel, 0.0, 0.0]]).float().to(device)
         if hidden_state is not None:
-            hidden_state = hidden_state.to(device)
+            if isinstance(hidden_state, list):
+                hidden_state = [h.to(device) for h in hidden_state]
+            else:
+                hidden_state = hidden_state.to(device)
         with torch.no_grad():
             x, hidden_state = trained_model([img.view(1, 1, h, w).to(device),
                                              vel_tensor,

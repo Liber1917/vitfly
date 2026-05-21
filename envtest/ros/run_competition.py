@@ -83,7 +83,7 @@ class AgilePilotNode:
         self.col = None
         self.t1 = 0 #Time flag
         self.timestamp = 0 #Time stamp initial
-        self.last_valid_img = None #Image that will be logged
+        self.last_valid_img = np.ones((480, 640), dtype=np.float32) * 10.0 # dummy init until first valid frame
         data_log_format = {'timestamp':[],
                            'desired_vel':[],
                            'quat_1':[],
@@ -203,9 +203,19 @@ class AgilePilotNode:
             elif model_type == 'StatefulSSM':
                 self.model = StatefulSSMNet().to(self.device).float()
                 print(f"[RUN_COMPETITION] Branch H — StatefulSSMNet loaded (Stateful SSM temporal head, {sum(p.numel() for p in self.model.parameters()):,} params)")
+            elif model_type == 'StatefulSSM_S':
+                self.model = StatefulSSMNet(d_state=4).to(self.device).float()
+                print(f"[RUN_COMPETITION] Branch Hs — StatefulSSMNet-S loaded (d_state=4, {sum(p.numel() for p in self.model.parameters()):,} params)")
             elif model_type == 'STHMambaStateful':
                 self.model = create_sth_mamba_stateful({}).to(self.device).float()
                 print(f"[RUN_COMPETITION] Branch Dst — STHMambaStateful loaded (STH-Mamba + Stateful Mamba-2, {sum(p.numel() for p in self.model.parameters()):,} params)")
+            elif model_type == 'STHMambaStateful_S':
+                self.model = STHMambaStateful(temporal_d_state=4).to(self.device).float()
+                print(f"[RUN_COMPETITION] Branch Ds — STHMambaStateful-S loaded (d_state=4 Mamba-2, {sum(p.numel() for p in self.model.parameters()):,} params)")
+            elif model_type == 'EStatefulModel':
+                from e_stateful_model import EStatefulModel, create_e_stateful
+                self.model = create_e_stateful({'embed_dim': 256}).to(self.device).float()
+                print(f"[RUN_COMPETITION] Branch E_s — EStatefulModel loaded (Stateful DecisionMamba, {sum(p.numel() for p in self.model.parameters()):,} params)")
             else:
                 print(f'[RUN_COMPETITION] Invalid model_type {model_type}. Exiting.')
                 exit()
