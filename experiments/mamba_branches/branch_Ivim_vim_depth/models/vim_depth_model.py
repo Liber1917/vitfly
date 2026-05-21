@@ -9,6 +9,10 @@ class ViMDepth(nn.Module):
         self.patch_embed = nn.Linear(patch_size * patch_size, dim)
         self.pos_embed = nn.Parameter(torch.randn(1, n_patches, dim) * 0.02)
         self.state_proj = nn.Linear(7, dim)  # vel(3) + quat(4), matches E/D/H
+        self.fusion = nn.Sequential(
+            nn.Linear(dim * 2, dim),
+            nn.GELU(),
+        )
         self.layers = nn.ModuleList([SSMLayer(dim, d_state) for _ in range(n_layers)])
         self.norm = nn.LayerNorm(dim)
         self.head = nn.Linear(dim, 3)
@@ -21,12 +25,13 @@ class ViMDepth(nn.Module):
         patches = d.unfold(2, ps, ps).unfold(3, ps, ps)
         patches = patches.permute(0, 2, 3, 1, 4, 5).contiguous()
         patches = patches.view(B, -1, ps * ps)  # (B, N, 100)
-        # State conditioning (same scaling as E/D/H: vel*0.1 + quat)
-        state_feat = self.state_proj(torch.cat((X[1] * 0.1, X[2]), dim=1))
-        x = self.patch_embed(patches) + self.pos_embed + state_feat.unsqueeze(1)
+        x = self.patch_embed(patches) + self.pos_embed  # pure visual tokens
         for layer in self.layers:
             x = layer(x)
-        x = self.norm(x).mean(dim=1)  # global average pooling
+        x = self.norm(x).mean(dim=1)  # global average pooling → (B, dim)
+        # E-style fusion: concat vision + state → fusion MLP → head
+        state_feat = self.state_proj(torch.cat((X[1] * 0.1, X[2]), dim=1))
+        x = self.fusion(torch.cat([x, state_feat], dim=1))
         return self.head(x), None
 
 class SSMLayer(nn.Module):
