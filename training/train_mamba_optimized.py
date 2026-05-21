@@ -42,6 +42,7 @@ sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/branch_B_mambavision
 sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/branch_C_cnn_mamba3/models')
 sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/branch_D_sth_mamba/models')
 sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/branch_E_decisionmamba/models')
+sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/branch_E_decisionmamba/models')
 sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/branch_Bplus_mambavision_mamba3/models')
 sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/mambafusion/models')
 sys.path.insert(0, '/root/vitfly/experiments/mamba_branches/essm/models')
@@ -181,6 +182,9 @@ def create_model(branch_name, config, device, args=None):
         model = create_sth_mamba_model(config)
     elif branch_name == 'E':
         model = create_decision_mamba_model(config)
+    elif branch_name == 'E_s':
+        from e_stateful_model import create_e_stateful
+        model = create_e_stateful(config)
     elif branch_name == 'Bplus':
         model = create_bplus_model(config)
     elif branch_name == 'Fusion':
@@ -246,7 +250,7 @@ def train_epoch(model, loader, optimizer, criterion, scaler, device, epoch,
     model.train()
     total_loss = 0.0
     total_samples = 0
-    is_stateful = branch_name in ('H', 'Hs', 'Dst')
+    is_stateful = branch_name in ('H', 'Hs', 'Dst', 'E_s')
     
     optimizer.zero_grad()
     
@@ -319,7 +323,7 @@ def train_epoch(model, loader, optimizer, criterion, scaler, device, epoch,
 def validate(model, loader, criterion, device, seq_len=1, branch_name=None):
     """Validate model performance."""
     model.eval()
-    is_stateful = branch_name in ("H", "Hs", "Dst")
+    is_stateful = branch_name in ("H", "Hs", "Dst", "E_s")
     total_loss = 0.0
 
     with torch.no_grad():
@@ -635,7 +639,7 @@ def main():
     # Train each branch
     results = {}
     for branch in args.branches:
-        if branch not in ['A', 'B', 'C', 'D', 'E', 'Bplus', 'Fusion', 'Essm', 'F', 'Fv4', 'Fv5', 'G', 'G_lstm', 'H', 'Hs', 'Dst', 'Ds', 'ResE', 'CrossE', 'LapE', 'ScanE']:
+        if branch not in ['A', 'B', 'C', 'D', 'E', 'Bplus', 'Fusion', 'Essm', 'F', 'Fv4', 'Fv5', 'G', 'G_lstm', 'H', 'Hs', 'Dst', 'Ds', 'E_s', 'ResE', 'CrossE', 'LapE', 'ScanE']:
             print(f"Warning: Unknown branch '{branch}', skipping...")
             continue
         
