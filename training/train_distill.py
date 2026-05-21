@@ -60,6 +60,7 @@ BRANCH_PATHS = {
     'E': '/root/vitfly/experiments/mamba_branches/branch_E_decisionmamba/models',
     'Fusion': '/root/vitfly/experiments/mamba_branches/mambafusion/models',
     'Essm': '/root/vitfly/experiments/mamba_branches/essm/models',
+    'E_s': '/root/vitfly/experiments/mamba_branches/branch_E_decisionmamba/models',
     'F': '/root/vitfly/experiments/mamba_branches/branch_F_lightweight_mamba3/models',
     'Fv4': '/root/vitfly/experiments/mamba_branches/branch_F_lightweight_mamba3/models',
     'G': '/root/vitfly/experiments/mamba_branches/branch_G_cnn_baseline/models',
@@ -78,6 +79,7 @@ from mambavision_ssm_model import MambaVisionSSMNet, create_mambavision_ssm_mode
 from cnn_mamba3_model import CNNMamba3Net, create_cnn_mamba3_model
 from sth_mamba_model import STHMambaNet, create_sth_mamba_model
 from decision_mamba_model import DecisionMambaNet, create_decision_mamba_model
+from e_stateful_model import create_e_stateful
 from bplus_model import BPlusModel, create_bplus_model
 from mambafusion_model import create_mambafusion_model
 from essm_model import create_essm_model
@@ -98,6 +100,7 @@ VISUAL_ENCODER_ATTR = {
     'C': 'cnn',             # CNNMamba3Net.cnn (CNNEncoder) → 512-dim
     'D': 'spatial_encoder', # STHMambaNet.spatial_encoder → 256-dim
     'E': 'cnn_encoder',     # DecisionMambaNet.cnn_encoder → 256-dim
+    'E_s': 'base.cnn_encoder', # EStatefulModel.base.cnn_encoder → 256-dim
     'Fusion': 'vision_encoder', # MambaFusion.vision_encoder → 512-dim
     'Essm': 'encoder',            # EssmNet.encoder → 256-dim
     'F': 'cnn_encoder',           # BranchFModel.cnn_encoder → 512-dim
@@ -109,7 +112,7 @@ VISUAL_ENCODER_ATTR = {
 # Visual feature dimension for each branch
 VISUAL_FEATURE_DIM = {
     'A': 512, 'B': 512, 'Bplus': 512,
-    'C': 512, 'D': 256, 'E': 256, 'Fusion': 512,
+    'C': 512, 'D': 256, 'E': 256, 'E_s': 256, 'Fusion': 512,
     'Essm': 256, 'F': 512, 'Fv4': 512, 'G': 256, 'H': 256,
 }
 
@@ -123,6 +126,7 @@ BRANCH_CREATORS = {
     'C': lambda cfg: create_cnn_mamba3_model(cfg),
     'D': lambda cfg: create_sth_mamba_model(cfg),
     'E': lambda cfg: create_decision_mamba_model(cfg),
+    'E_s': lambda cfg: create_e_stateful(cfg),
     'Fusion': lambda cfg: create_mambafusion_model(cfg),
     'Essm': lambda cfg: create_essm_model(cfg),
     'F': lambda cfg: create_branch_f_model(cfg),
@@ -169,6 +173,11 @@ SPATIAL_HOOK_CONFIG = {
         'student_attr': 'cnn_encoder.conv4',
         'teacher_attr': 'encoder_blocks',
         'teacher_idx': -1,  # last block → (B,64,8,11)
+    },
+    'E_s': {  # EStatefulModel: same CNN, wrapped in base
+        'student_attr': 'base.cnn_encoder.conv4',
+        'teacher_attr': 'encoder_blocks',
+        'teacher_idx': -1,
     },
 }
 
@@ -265,7 +274,9 @@ class FeatureHook:
             attr = VISUAL_ENCODER_ATTR.get(teacher_branch)
             if attr is None:
                 raise ValueError(f"No visual encoder attr for branch {teacher_branch}")
-            encoder_module = getattr(teacher_model, attr)
+            encoder_module = teacher_model
+            for a in attr.split('.'):
+                encoder_module = getattr(encoder_module, a)
         else:
             encoder_module = teacher_model.decoder
         handle = encoder_module.register_forward_hook(
@@ -278,7 +289,9 @@ class FeatureHook:
         attr = VISUAL_ENCODER_ATTR.get(branch)
         if attr is None:
             raise ValueError(f"No visual encoder attr defined for branch {branch}")
-        encoder_module = getattr(student_model, attr)
+        encoder_module = student_model
+        for a in attr.split('.'):
+            encoder_module = getattr(encoder_module, a)
         handle = encoder_module.register_forward_hook(
             self._student_hook_fn('student_visual')
         )
@@ -964,14 +977,14 @@ def main():
                         default='/root/vitfly/models/ViTLSTM_model.pth',
                         help='Path to teacher model checkpoint')
     parser.add_argument('--teacher-branch', type=str, default=None,
-                        choices=[None, 'A', 'B', 'Bplus', 'C', 'D', 'E', 'teacher'],
+                        choices=[None, 'A', 'B', 'Bplus', 'C', 'D', 'E', 'E_s', 'teacher'],
                         help='Branch name for born-again teacher (None=ViT+LSTM)')
     parser.add_argument('--temperature', type=float, default=1.0,
                         help='Temperature for softening teacher logits')
     
     # Branch
     parser.add_argument('--branch', type=str, default='B',
-                         choices=['A', 'B', 'Bplus', 'C', 'D', 'E', 'Fusion', 'Essm'],
+                         choices=['A', 'B', 'Bplus', 'C', 'D', 'E', 'E_s', 'Fusion', 'Essm'],
                         help='Student branch to train')
     parser.add_argument('--all-branches', action='store_true',
                         help='Train all 6 branches sequentially')
