@@ -653,6 +653,9 @@ python3 run_competition.py ...
 | C | 3 | 5 | 3 | — | — |
 | D | 2 | 5 | 2 | — | — |
 | E | 3 | 4 | **1** 🏆 | **1** 🏆 | — |
+| **E_s (stateful)** | 3 | — | — | — | — |
+| **H (stateful)** | 5 | — | — | — | — |
+| Hs (stateful) | 7 | — | — | — | — |
 | E-SSM | 4 | — | ❌ 蒸馏失败 | — | — |
 | Fusion (3 seeds) | 7/2/4 | — | 2/4/1→2.3μ | 4/2/2→2.7μ | — |
 | E Born-again γ=1 | — | — | 3 | — | — |
@@ -670,6 +673,8 @@ python3 run_competition.py ...
 | C | 0 | DNF | 2 | — | — |
 | D | 0 | 0 | 0 | — | — |
 | E | 2 | 0 | 1 | 2 | — |
+| **E_s (stateful)** | **2** | — | — | — | — |
+| **H (stateful)** | **1** 🏆 | — | — | — | — |
 | Fusion | 0 | — | 0 | 1 | — |
 | Born-again γ=1 | — | — | 2 | — | — |
 | Born-again γ=2 | — | — | 2 | — | — |
@@ -686,6 +691,9 @@ python3 run_competition.py ...
 8. **seq_len=1 is optimal**: Multi-step (4/8/16) degrades all variants.
 9. **seq_len > 1 for Teacher untested**: Could benefit from LSTM temporal memory.
 10. **E-SSM BC (4 cr) ≈ E BC (3 cr)**: SSM encoder avoidance capability matches CNN. Distillation failure (feat_loss 0.85→10.58) is due to spatial structure incompatibility, not SSM encoder inadequacy.
+11. **Stateful SSM (E_s/H) dramatically improves control quality**: E_s MAE=0.111 vs E 0.220 (-2×), Jerk=0.0063 vs 0.023 (-3.6×). Collision reduction is NOT the primary benefit — temporal state space modeling enables smoother and more precise control.
+12. **H (CoarseSSM, d=32, 1.11M) achieves best BC generalization**: 1 crash in trees (vs E BC 2), demonstrating stateful SSM's advantage in unseen environments.
+13. **Simple CoarseSSM > complex Mamba-2 for stateful**: H (1.11M, 67-line SSM) flies stably; Ds (2.56M, 260-line Mamba-2) DNFs. State regularization required.
 
 ### File Inventory
 
