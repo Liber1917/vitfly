@@ -12,3 +12,8 @@ checklist.md
 .claude/skills/superpowers
 .claude/skills/using-superpowers
 .claude/skills/autoresearch
+train_set/
+envtest/ros/train_set/
+.playwright-mcp
+*:Zone.Identifier
+*.bkp
